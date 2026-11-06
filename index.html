@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>스마트 업무일지 관리 시스템 (WorkLog Studio)</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #print-area, #print-area * {
+        visibility: visible;
+      }
+      #print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 20px;
+        background: white;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo & Title -->
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 flex items-center justify-center text-white shadow-md shadow-indigo-100">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h1 class="text-lg font-bold text-slate-900 tracking-tight">WorkLog Studio</h1>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-800">
+                <span class="w-1.5 h-1.5 mr-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                자동 저장 안전 모드
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 hidden sm:block">SSD 고장 대비 백업 및 클라우드 연동 지원 업무일지</p>
+          </div>
+        </div>
+
+        <!-- Action Tools -->
+        <div class="flex items-center space-x-2 sm:space-x-3">
+          <button id="btn-open-backup" class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs sm:text-sm font-medium rounded-lg text-slate-700 bg-white hover:bg-slate-50 transition-colors">
+            <svg class="w-4 h-4 mr-1.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+            </svg>
+            <span class="hidden md:inline">데이터 백업 / 복원</span>
+            <span class="md:hidden">백업</span>
+          </button>
+
+          <button id="btn-guide" class="inline-flex items-center px-3 py-1.5 border border-amber-200 text-xs sm:text-sm font-medium rounded-lg text-amber-800 bg-amber-50 hover:bg-amber-100 transition-colors">
+            <svg class="w-4 h-4 mr-1.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <span class="hidden md:inline">24시간 PC & SSD 보호 가이드</span>
+            <span class="md:hidden">안내</span>
+          </button>
+
+          <button id="btn-new-log-top" class="inline-flex items-center px-3.5 py-1.5 border border-transparent text-xs sm:text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 transition-colors">
+            <svg class="w-4 h-4 mr-1 sm:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            새 일지 작성
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- SSD ALERT BANNER -->
+  <div id="safety-banner" class="bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white px-4 py-2 text-xs sm:text-sm flex items-center justify-between shadow-inner">
+    <div class="max-w-7xl mx-auto flex items-center space-x-2 w-full justify-between">
+      <div class="flex items-center space-x-2">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span>
+          <strong>24시간 상시 가동 PC 보호 팁:</strong> SSD 돌연사에 대비해 작성한 일지는 브라우저와 함께 <strong>[백업 파일 다운로드]</strong>를 통해 클라우드(Google Drive, OneDrive 등)나 외장 드라이브에 주기적으로 복사해 두는 것을 권장합니다!
+        </span>
+      </div>
+      <button id="btn-close-banner" class="text-white/80 hover:text-white ml-2 flex-shrink-0 p-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN CONTAINER -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-1 flex flex-col md:flex-row gap-6">
+
+    <!-- LEFT SIDEBAR: Search, Filters, Log List -->
+    <aside class="w-full md:w-80 lg:w-96 flex-shrink-0 flex flex-col gap-4">
+      
+      <!-- Search & Filter Card -->
+      <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+        <div class="relative">
+          <input type="text" id="input-search" placeholder="업무 내용, 태그, 제목 검색..." class="w-full pl-9 pr-8 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+          <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <button id="btn-clear-search" class="hidden absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Filter Tags -->
+        <div class="mt-3 flex flex-wrap gap-1.5" id="category-filter-container">
+          <button class="filter-pill active px-2.5 py-1 text-xs rounded-full font-medium transition-colors bg-indigo-600 text-white" data-cat="all">전체</button>
+          <button class="filter-pill px-2.5 py-1 text-xs rounded-full font-medium transition-colors bg-slate-100 text-slate-600 hover:bg-slate-200" data-cat="개발">개발</button>
+          <button class="filter-pill px-2.5 py-1 text-xs rounded-full font-medium transition-colors bg-slate-100 text-slate-600 hover:bg-slate-200" data-cat="기획">기획</button>
+          <button class="filter-pill px-2.5 py-1 text-xs rounded-full font-medium transition-colors bg-slate-100 text-slate-600 hover:bg-slate-200" data-cat="회의">회의</button>
+          <button class="filter-pill px-2.5 py-1 text-xs rounded-full font-medium transition-colors bg-slate-100 text-slate-600 hover:bg-slate-200" data-cat="운영">운영</button>
+          <button class="filter-pill px-2.5 py-1 text-xs rounded-full font-medium transition-colors bg-slate-100 text-slate-600 hover:bg-slate-200" data-cat="긴급">긴급</button>
+        </div>
+      </div>
+
+      <!-- Log List Panel -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm flex-1 flex flex-col min-h-[350px] max-h-[700px] overflow-hidden">
+        <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center">
+            <svg class="w-3.5 h-3.5 mr-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+            </svg>
+            일지 목록 (<span id="log-count">0</span>)
+          </span>
+          <span class="text-xs text-slate-400" id="filter-status-text">최신순</span>
+        </div>
+
+        <div id="log-list" class="divide-y divide-slate-100 overflow-y-auto flex-1 p-2 space-y-1">
+          <!-- Dynamically populated -->
+        </div>
+
+        <div class="p-3 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between text-xs text-slate-500">
+          <span>마지막 저장: <span id="last-saved-time" class="font-medium text-slate-700">-</span></span>
+          <button id="btn-quick-export-all" class="text-indigo-600 hover:text-indigo-800 font-medium hover:underline">전체 JSON 백업</button>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- RIGHT CONTENT: Viewer & Editor -->
+    <main class="flex-1 flex flex-col min-w-0">
+      
+      <!-- MODE 1: DETAIL VIEW MODE -->
+      <section id="view-mode" class="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col flex-1 overflow-hidden">
+        <!-- Action Toolbar -->
+        <div class="px-6 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-slate-50/60 no-print">
+          <div class="flex items-center space-x-2">
+            <span id="view-tag-badge" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800">개발</span>
+            <span id="view-date-badge" class="text-sm font-semibold text-slate-600">2026-11-06 (금)</span>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <button id="btn-edit-current" class="inline-flex items-center px-3 py-1.5 border border-slate-300 text-xs sm:text-sm font-medium rounded-lg text-slate-700 bg-white hover:bg-slate-50 shadow-sm transition-colors">
+              <svg class="w-4 h-4 mr-1 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+              </svg>
+              수정
+            </button>
+            <button id="btn-copy-markdown" class="inline-flex items-center px-3 py-1.5 border border-slate-300 text-xs sm:text-sm font-medium rounded-lg text-slate-700 bg-white hover:bg-slate-50 shadow-sm transition-colors" title="마크다운 양식으로 복사">
+              <svg class="w-4 h-4 mr-1 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+              </svg>
+              텍스트 복사
+            </button>
+            <button id="btn-print-current" class="inline-flex items-center px-3 py-1.5 border border-slate-300 text-xs sm:text-sm font-medium rounded-lg text-slate-700 bg-white hover:bg-slate-50 shadow-sm transition-colors">
+              <svg class="w-4 h-4 mr-1 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+              </svg>
+              인쇄 / PDF
+            </button>
+            <button id="btn-delete-current" class="inline-flex items-center px-3 py-1.5 border border-rose-200 text-xs sm:text-sm font-medium rounded-lg text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors">
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+              삭제
+            </button>
+          </div>
+        </div>
+
+        <!-- Printable Article Content -->
+        <div id="print-area" class="p-6 sm:p-8 overflow-y-auto flex-1 space-y-6">
+          <!-- Header details -->
+          <div>
+            <h2 id="view-title" class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-2">2026-11-06 일일 업무일지</h2>
+            <div class="flex flex-wrap items-center gap-y-2 gap-x-4 text-xs sm:text-sm text-slate-500 pb-4 border-b border-slate-200">
+              <span class="flex items-center">
+                <svg class="w-4 h-4 mr-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                작성자: <span id="view-author" class="font-medium text-slate-700 ml-1">홍길동 (개발팀)</span>
+              </span>
+              <span class="flex items-center">
+                <svg class="w-4 h-4 mr-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                진행도: <span id="view-progress-rate" class="font-medium text-emerald-600 ml-1">100%</span>
+              </span>
+              <span class="flex items-center">
+                <svg class="w-4 h-4 mr-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                </svg>
+                태그: <span id="view-tags-text" class="font-medium text-slate-700 ml-1">#개발, #서버점검</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Section: Today Key Goal -->
+          <div class="bg-indigo-50/60 border border-indigo-100 rounded-xl p-4">
+            <h3 class="text-xs font-bold text-indigo-900 uppercase tracking-wider mb-1 flex items-center">
+              <svg class="w-4 h-4 mr-1.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+              오늘의 핵심 목표 & 중점 사항
+            </h3>
+            <p id="view-key-goal" class="text-slate-800 text-sm leading-relaxed whitespace-pre-line font-medium">
+              SSD 이상 징후 이후 서버 및 개발 데이터 안정적 백업 체계 구축 완료
+            </p>
+          </div>
+
+          <!-- Section: Work Log Table / Task Items -->
+          <div>
+            <h3 class="text-sm font-bold text-slate-900 mb-3 flex items-center">
+              <svg class="w-4 h-4 mr-1.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+              </svg>
+              주요 업무 내역 및 진행 상황
+            </h3>
+            <div class="border border-slate-200 rounded-lg overflow-hidden shadow-xs">
+              <table class="min-w-full divide-y divide-slate-200 text-sm">
+                <thead class="bg-slate-50 text-slate-600 text-xs font-semibold">
+                  <tr>
+                    <th scope="col" class="px-4 py-2.5 text-left w-14">상태</th>
+                    <th scope="col" class="px-4 py-2.5 text-left w-24">시간/구분</th>
+                    <th scope="col" class="px-4 py-2.5 text-left">업무 내용 및 결과</th>
+                    <th scope="col" class="px-4 py-2.5 text-left w-24">진행률</th>
+                  </tr>
+                </thead>
+                <tbody id="view-tasks-tbody" class="divide-y divide-slate-100 bg-white">
+                  <!-- Dynamically rendered -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Section: Issues & Notes -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="border border-amber-200 bg-amber-50/40 rounded-xl p-4">
+              <h3 class="text-xs font-bold text-amber-900 uppercase tracking-wider mb-2 flex items-center">
+                <svg class="w-4 h-4 mr-1.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                특이사항 / 이슈 & 문제점
+              </h3>
+              <p id="view-issues" class="text-sm text-slate-700 whitespace-pre-line leading-relaxed">
+                24시간 상시 가동 중인 본체 SSD SMART 지표 확인 결과 경고 단계 진입 확인. 즉시 외장 드라이브에 이미지 백업 수행함.
+              </p>
+            </div>
+
+            <div class="border border-emerald-200 bg-emerald-50/40 rounded-xl p-4">
+              <h3 class="text-xs font-bold text-emerald-900 uppercase tracking-wider mb-2 flex items-center">
+                <svg class="w-4 h-4 mr-1.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                내일 예정 업무 (Tomorrow's Plan)
+              </h3>
+              <p id="view-tomorrow" class="text-sm text-slate-700 whitespace-pre-line leading-relaxed">
+                1. 신규 NVMe SSD 교체 작업 및 OS 마이그레이션<br>
+                2. 자동 클라우드 싱크(Google Drive 동기화) 세팅
+              </p>
+            </div>
+          </div>
+
+          <!-- Footer remarks -->
+          <div class="pt-4 border-t border-slate-200 text-xs text-slate-400 flex justify-between items-center">
+            <span>WorkLog Studio 저장 데이터 • 고유 ID: <span id="view-log-id" class="font-mono">#001</span></span>
+            <span class="text-emerald-600 font-medium flex items-center">
+              <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              로컬 저장소 검증 완료
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- MODE 2: EDIT / CREATE MODE -->
+      <section id="edit-mode" class="hidden bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col flex-1 overflow-hidden">
+        <!-- Edit Form Header -->
+        <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/70">
+          <div>
+            <h2 id="edit-form-heading" class="text-lg font-bold text-slate-900">새 업무일지 작성</h2>
+            <p class="text-xs text-slate-500">작성 중에도 로컬 저장소에 임시 보존되어 브라우저가 꺼져도 복구할 수 있습니다.</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button id="btn-cancel-edit" type="button" class="px-3 py-1.5 border border-slate-300 text-xs sm:text-sm font-medium rounded-lg text-slate-700 bg-white hover:bg-slate-50 transition-colors">
+              취소
+            </button>
+            <button id="btn-save-log" type="button" class="inline-flex items-center px-4 py-1.5 border border-transparent text-xs sm:text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 transition-colors">
+              <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+              </svg>
+              일지 저장하기
+            </button>
+          </div>
+        </div>
+
+        <!-- Form Body -->
+        <form id="log-form" class="p-6 sm:p-8 overflow-y-auto flex-1 space-y-6">
+          <input type="hidden" id="form-log-id" value="">
+
+          <!-- Date, Author, Category -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label for="form-date" class="block text-xs font-semibold text-slate-700 mb-1">작성 일자 *</label>
+              <input type="date" id="form-date" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div>
+              <label for="form-author" class="block text-xs font-semibold text-slate-700 mb-1">작성자 / 부서</label>
+              <input type="text" id="form-author" placeholder="예: 홍길동 (개발팀)" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div>
+              <label for="form-category" class="block text-xs font-semibold text-slate-700 mb-1">주요 업무 카테고리</label>
+              <select id="form-category" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                <option value="개발">개발 (Development)</option>
+                <option value="기획">기획 (Planning)</option>
+                <option value="회의">회의 (Meeting)</option>
+                <option value="운영">운영/유지보수 (Ops)</option>
+                <option value="긴급">긴급 점검 (Urgent)</option>
+                <option value="기타">기타 (General)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Title -->
+          <div>
+            <label for="form-title" class="block text-xs font-semibold text-slate-700 mb-1">일지 제목 *</label>
+            <input type="text" id="form-title" required placeholder="예: 2026-11-06 일일 업무일지" class="w-full px-3.5 py-2 text-sm font-medium border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+
+          <!-- Key Goal -->
+          <div>
+            <label for="form-key-goal" class="block text-xs font-semibold text-slate-700 mb-1">오늘의 핵심 목표 & 중점 사항</label>
+            <input type="text" id="form-key-goal" placeholder="오늘 반드시 완수할 핵심 성과 목표 1~2가지를 입력하세요" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+
+          <!-- Tasks Table Generator -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-xs font-semibold text-slate-700">세부 업무 진행 내역 (Tasks)</label>
+              <button type="button" id="btn-add-task-row" class="text-xs font-medium text-indigo-600 hover:text-indigo-800 flex items-center">
+                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                업무 항목 추가
+              </button>
+            </div>
+
+            <div class="border border-slate-200 rounded-lg overflow-hidden">
+              <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 flex items-center text-xs font-semibold text-slate-600">
+                <span class="w-12 text-center">완료</span>
+                <span class="w-28 pl-2">시간/분류</span>
+                <span class="flex-1 pl-2">업무 상세 내용</span>
+                <span class="w-24 pl-2">진도율</span>
+                <span class="w-10 text-center">삭제</span>
+              </div>
+              <div id="tasks-editor-list" class="divide-y divide-slate-100 bg-white p-2 space-y-2">
+                <!-- Dynamically generated task rows -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Issues & Tomorrow's Plan -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="form-issues" class="block text-xs font-semibold text-slate-700 mb-1">특이사항 / 이슈 및 애로사항</label>
+              <textarea id="form-issues" rows="4" placeholder="장애, 지연 사유, 시스템 경고(SSD/네트워크 등) 등 주의가 필요한 사항" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+            </div>
+            <div>
+              <label for="form-tomorrow" class="block text-xs font-semibold text-slate-700 mb-1">내일 예정 업무 (Tomorrow's Plan)</label>
+              <textarea id="form-tomorrow" rows="4" placeholder="익일 우선적으로 착수할 업무 리스트" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+            </div>
+          </div>
+
+          <!-- Tags -->
+          <div>
+            <label for="form-tags" class="block text-xs font-semibold text-slate-700 mb-1">해시태그 (쉼표로 구분)</label>
+            <input type="text" id="form-tags" placeholder="개발, 회의, 서버점검, 데이터백업" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </form>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- BACKUP & RESTORE MODAL -->
+  <div id="modal-backup" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div class="flex items-center space-x-2">
+          <div class="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">데이터 백업 및 복원 (SSD 고장 완전 대비)</h3>
+            <p class="text-xs text-slate-500">컴퓨터 고장 시에도 일지를 영구 보존할 수 있습니다.</p>
+          </div>
+        </div>
+        <button id="btn-close-backup-modal" class="text-slate-400 hover:text-slate-600 p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-6">
+        
+        <!-- Action 1: Export JSON File -->
+        <div class="p-4 rounded-xl border border-indigo-200 bg-indigo-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h4 class="text-sm font-bold text-indigo-950 flex items-center">
+              <svg class="w-4 h-4 mr-1.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+              </svg>
+              전체 일지 백업 파일 다운로드 (JSON)
+            </h4>
+            <p class="text-xs text-slate-600 mt-1">지금까지 작성된 모든 업무일지를 단일 파일로 내려받아 Google Drive나 USB 등에 보관하세요.</p>
+          </div>
+          <button id="btn-download-json-backup" class="flex-shrink-0 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs sm:text-sm rounded-lg shadow-sm transition-colors">
+            백업 파일 저장
+          </button>
+        </div>
+
+        <!-- Action 2: Restore from JSON File -->
+        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h4 class="text-sm font-bold text-slate-900 flex items-center">
+              <svg class="w-4 h-4 mr-1.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+              </svg>
+              백업 파일로 복원하기 (Restore)
+            </h4>
+            <p class="text-xs text-slate-600 mt-1">컴퓨터를 교체하거나 새 브라우저에서 백업 JSON 파일을 불러와 그대로 복원합니다.</p>
+          </div>
+          <label class="flex-shrink-0 px-4 py-2 border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-medium text-xs sm:text-sm rounded-lg shadow-sm cursor-pointer transition-colors text-center">
+            파일 선택 및 복원
+            <input type="file" id="input-restore-file" accept=".json" class="hidden">
+          </label>
+        </div>
+
+        <!-- Action 3: Copy to Clipboard -->
+        <div class="p-4 rounded-xl border border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h4 class="text-sm font-bold text-slate-900 flex items-center">
+              <svg class="w-4 h-4 mr-1.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+              </svg>
+              클립보드로 전체 텍스트 복사
+            </h4>
+            <p class="text-xs text-slate-600 mt-1">메모장, 노션, 이메일 본문 등에 그대로 붙여넣을 수 있는 원문 텍스트를 복사합니다.</p>
+          </div>
+          <button id="btn-copy-all-clipboard" class="flex-shrink-0 px-4 py-2 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-medium text-xs sm:text-sm rounded-lg shadow-sm transition-colors">
+            전체 복사
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <button id="btn-close-backup-footer" class="px-4 py-2 text-xs sm:text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-100">
+          닫기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GUIDE MODAL (SSD & PC Protection) -->
+  <div id="modal-guide" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-amber-50">
+        <div class="flex items-center space-x-2">
+          <div class="p-2 bg-amber-100 text-amber-700 rounded-lg">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+          </div>
+          <h3 class="text-base font-bold text-slate-900">24시간 가동 PC & SSD 안전 관리 가이드</h3>
+        </div>
+        <button id="btn-close-guide-modal" class="text-slate-400 hover:text-slate-600 p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4 text-sm text-slate-700 leading-relaxed">
+        <div class="border-l-4 border-amber-500 pl-3 py-1 bg-amber-50/50">
+          <p class="font-semibold text-amber-900">컴퓨터를 24시간 켜둘 때 SSD가 위험해지는 이유</p>
+          <p class="text-xs text-slate-600 mt-1">지속적인 발열, 불필요한 시스템 임시 파일 쓰기(TBW 소모), 전원 순간 불안정 등이 겹치면 SSD는 사전 징후 없이 갑자기 인식 불능(돌연사) 상태가 될 수 있습니다.</p>
+        </div>
+
+        <h4 class="font-bold text-slate-900 mt-3 text-xs uppercase tracking-wider">추천 3단계 데이터 안전 수칙:</h4>
+        <ol class="space-y-2.5 text-xs sm:text-sm">
+          <li class="flex items-start">
+            <span class="inline-flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-indigo-100 text-indigo-700 font-bold text-xs flex-shrink-0">1</span>
+            <span><strong>3-2-1 백업 원칙:</strong> 최소 3개의 복사본을 2가지 서로 다른 매체(내부 드라이브 + 외장 드라이브/클라우드)에 보관하고, 1개는 반드시 원격지(Google Drive 등)에 둡니다.</span>
+          </li>
+          <li class="flex items-start">
+            <span class="inline-flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-indigo-100 text-indigo-700 font-bold text-xs flex-shrink-0">2</span>
+            <span><strong>주 1회 백업 파일 내보내기:</strong> 본 시스템 상단의 <strong>[데이터 백업/복원]</strong> 메뉴에서 '백업 파일 저장'을 눌러 다운로드 폴더 외의 클라우드 동기화 폴더로 옮기세요.</span>
+          </li>
+          <li class="flex items-start">
+            <span class="inline-flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-indigo-100 text-indigo-700 font-bold text-xs flex-shrink-0">3</span>
+            <span><strong>SSD 수명 모니터링 툴 설치:</strong> CrystalDiskInfo(무료)를 설치하여 SSD 건강 상태(Health Status)와 온도를 주 1회 점검하세요.</span>
+          </li>
+        </ol>
+      </div>
+
+      <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <button id="btn-close-guide-footer" class="px-4 py-2 text-xs sm:text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-100">
+          확인했습니다
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIRM MODAL -->
+  <div id="modal-confirm" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 p-6 text-center">
+      <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 mx-auto flex items-center justify-center mb-4">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+      </div>
+      <h3 id="confirm-modal-title" class="text-base font-bold text-slate-900 mb-1">일지 삭제 확인</h3>
+      <p id="confirm-modal-desc" class="text-xs text-slate-500 mb-6">정말 이 업무일지를 삭제하시겠습니까? 삭제된 일지는 복구할 수 없습니다.</p>
+      <div class="flex items-center justify-center space-x-3">
+        <button id="btn-confirm-cancel" class="px-4 py-2 text-xs sm:text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">취소</button>
+        <button id="btn-confirm-ok" class="px-4 py-2 text-xs sm:text-sm font-medium text-white bg-rose-600 rounded-lg hover:bg-rose-700 shadow-sm">삭제하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+  <!-- APPLICATION JAVASCRIPT -->
+  <script>
+    // --- STORAGE & DEFAULT DATA ---
+    const STORAGE_KEY = 'worklog_studio_entries_v1';
+    
+    // Sample initial data if user starts fresh
+    const SAMPLE_LOGS = [
+      {
+        id: 'log-1730870400000',
+        date: '2026-11-06',
+        title: '2026-11-06 일일 업무일지 (SSD 점검 및 백업 완료)',
+        author: '사용자 (업무 담당)',
+        category: '운영',
+        keyGoal: '24시간 상시 가동 PC SSD 위험 조치 및 일지 데이터 안전망 구축',
+        tasks: [
+          { done: true, time: '09:00 - 10:30', content: 'SSD SMART 건강 상태 진단 및 외장 백업 드라이브 복사', progress: 100 },
+          { done: true, time: '10:30 - 12:00', content: '주요 프로젝트 업무일지 정리 및 백업 파일 생성', progress: 100 },
+          { done: true, time: '13:00 - 15:30', content: '웹 기반 업무일지 페이지 도입 및 로컬 스토리지 연동 테스트', progress: 100 },
+          { done: false, time: '16:00 - 18:00', content: '익일 교체용 NVMe SSD 사양 검토 및 클라우드 동기화 스케줄링', progress: 50 }
+        ],
+        issues: 'PC를 24시간 계속 켜두다 보니 SSD 수명 지표 및 발열 위험이 확인됨. 긴급 1차 백업은 완료하였으며, 향후 주간 단위 JSON 내보내기 자동 알림 적용 필요.',
+        tomorrow: '1. 교체용 새 SSD 장착 및 마이그레이션\n2. 주요 업무 로그 클라우드 자동 동기화 설정',
+        tags: ['서버점검', 'SSD백업', '운영관리'],
+        updatedAt: '2026-11-06 10:20:00'
+      },
+      {
+        id: 'log-1730784000000',
+        date: '2026-11-05',
+        title: '2026-11-05 일일 업무일지 (주요 프로젝트 기획 회의)',
+        author: '사용자 (업무 담당)',
+        category: '회의',
+        keyGoal: '4분기 주요 업무 마일스톤 점검 및 보고서 작성',
+        tasks: [
+          { done: true, time: '10:00 - 11:30', content: '팀 주간 정례 회의 참석 및 업무 현황 공유', progress: 100 },
+          { done: true, time: '13:30 - 16:00', content: '프로젝트 산출물 문서 검토 및 클라이언트 피드백 반영', progress: 100 },
+          { done: true, time: '16:30 - 17:30', content: '일일 업무 정리 및 내일 업무 우선순위 도출', progress: 100 }
+        ],
+        issues: '특이사항 없음. 원활히 진행됨.',
+        tomorrow: '주간 업무 보고서 최종 제출 및 사내 시스템 점검',
+        tags: ['정례회의', '기획', '문서정리'],
+        updatedAt: '2026-11-05 18:00:00'
+      }
+    ];
+
+    let logs = [];
+    let currentSelectedId = null;
+    let activeFilterCategory = 'all';
+    let searchQuery = '';
+    let confirmCallback = null;
+
+    // --- DOM REFERENCES ---
+    const logListEl = document.getElementById('log-list');
+    const logCountEl = document.getElementById('log-count');
+    const lastSavedTimeEl = document.getElementById('last-saved-time');
+    const inputSearch = document.getElementById('input-search');
+    const btnClearSearch = document.getElementById('btn-clear-search');
+    const categoryFilterContainer = document.getElementById('category-filter-container');
+
+    // View Mode Elements
+    const viewModeSec = document.getElementById('view-mode');
+    const viewTitle = document.getElementById('view-title');
+    const viewAuthor = document.getElementById('view-author');
+    const viewDateBadge = document.getElementById('view-date-badge');
+    const viewTagBadge = document.getElementById('view-tag-badge');
+    const viewProgressRate = document.getElementById('view-progress-rate');
+    const viewTagsText = document.getElementById('view-tags-text');
+    const viewKeyGoal = document.getElementById('view-key-goal');
+    const viewTasksTbody = document.getElementById('view-tasks-tbody');
+    const viewIssues = document.getElementById('view-issues');
+    const viewTomorrow = document.getElementById('view-tomorrow');
+    const viewLogId = document.getElementById('view-log-id');
+
+    // Edit Mode Elements
+    const editModeSec = document.getElementById('edit-mode');
+    const editFormHeading = document.getElementById('edit-form-heading');
+    const logForm = document.getElementById('log-form');
+    const formLogId = document.getElementById('form-log-id');
+    const formDate = document.getElementById('form-date');
+    const formAuthor = document.getElementById('form-author');
+    const formCategory = document.getElementById('form-category');
+    const formTitle = document.getElementById('form-title');
+    const formKeyGoal = document.getElementById('form-key-goal');
+    const tasksEditorList = document.getElementById('tasks-editor-list');
+    const formIssues = document.getElementById('form-issues');
+    const formTomorrow = document.getElementById('form-tomorrow');
+    const formTags = document.getElementById('form-tags');
+
+    // Modals & Banners
+    const safetyBanner = document.getElementById('safety-banner');
+    const btnCloseBanner = document.getElementById('btn-close-banner');
+    const modalBackup = document.getElementById('modal-backup');
+    const modalGuide = document.getElementById('modal-guide');
+    const modalConfirm = document.getElementById('modal-confirm');
+    const confirmModalTitle = document.getElementById('confirm-modal-title');
+    const confirmModalDesc = document.getElementById('confirm-modal-desc');
+
+    // --- TOAST NOTIFICATION ---
+    function showToast(message, type = 'success') {
+      const toastContainer = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      
+      const colors = {
+        success: 'bg-emerald-600 text-white',
+        info: 'bg-indigo-600 text-white',
+        warning: 'bg-amber-600 text-white',
+        error: 'bg-rose-600 text-white'
+      };
+
+      toast.className = `px-4 py-2.5 rounded-lg shadow-lg text-xs sm:text-sm font-medium flex items-center space-x-2 transform transition-all duration-300 translate-y-2 opacity-0 ${colors[type] || colors.info}`;
+      toast.innerHTML = `
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${type === 'success' ? 'M5 13l4 4L19 7' : 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'}"></path>
+        </svg>
+        <span>${message}</span>
+      `;
+      toastContainer.appendChild(toast);
+
+      // Animate in
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      // Animate out
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // --- CONFIRM MODAL HELPER ---
+    function openConfirm(title, desc, onConfirm) {
+      confirmModalTitle.textContent = title;
+      confirmModalDesc.textContent = desc;
+      confirmCallback = onConfirm;
+      modalConfirm.classList.remove('hidden');
+    }
+
+    // --- DATA PERSISTENCE ---
+    function loadLogs() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          logs = JSON.parse(stored);
+        } else {
+          logs = [...SAMPLE_LOGS];
+          saveLogs(false);
+        }
+      } catch (e) {
+        console.warn('LocalStorage access error:', e);
+        logs = [...SAMPLE_LOGS];
+      }
+    }
+
+    function saveLogs(notify = true) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+        const now = new Date();
+        const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+        lastSavedTimeEl.textContent = timeStr;
+        if (notify) {
+          showToast('업무일지가 로컬에 안전하게 저장되었습니다.', 'success');
+        }
+      } catch (e) {
+        console.error('Save failed:', e);
+        showToast('저장 공간 초과 또는 브라우저 보안 제한으로 저장이 실패했습니다.', 'error');
+      }
+    }
+
+    // --- RENDER FUNCTIONS ---
+    function renderLogList() {
+      const query = searchQuery.trim().toLowerCase();
+      
+      const filtered = logs.filter(log => {
+        const matchCategory = (activeFilterCategory === 'all') || (log.category === activeFilterCategory);
+        const matchSearch = !query || 
+          log.title.toLowerCase().includes(query) ||
+          log.date.includes(query) ||
+          (log.author && log.author.toLowerCase().includes(query)) ||
+          (log.keyGoal && log.keyGoal.toLowerCase().includes(query)) ||
+          (log.tags && log.tags.some(t => t.toLowerCase().includes(query))) ||
+          (log.tasks && log.tasks.some(t => t.content.toLowerCase().includes(query)));
+        return matchCategory && matchSearch;
+      });
+
+      // Sort by date desc
+      filtered.sort((a, b) => b.date.localeCompare(a.date));
+
+      logCountEl.textContent = filtered.length;
+      logListEl.innerHTML = '';
+
+      if (filtered.length === 0) {
+        logListEl.innerHTML = `
+          <div class="text-center py-8 text-slate-400 text-xs">
+            <svg class="w-8 h-8 mx-auto mb-2 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            일치하는 일지가 없습니다.
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(log => {
+        const isSelected = log.id === currentSelectedId;
+        const totalTasks = log.tasks ? log.tasks.length : 0;
+        const doneTasks = log.tasks ? log.tasks.filter(t => t.done).length : 0;
+        const rate = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+
+        const item = document.createElement('div');
+        item.className = `p-3 rounded-lg cursor-pointer transition-all ${
+          isSelected 
+            ? 'bg-indigo-50 border border-indigo-200 shadow-xs' 
+            : 'hover:bg-slate-50 border border-transparent'
+        }`;
+        
+        item.innerHTML = `
+          <div class="flex items-center justify-between text-xs mb-1">
+            <span class="font-bold ${isSelected ? 'text-indigo-900' : 'text-slate-700'}">${log.date}</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-semibold ${getCategoryBadgeStyle(log.category)}">
+              ${log.category || '기타'}
+            </span>
+          </div>
+          <h4 class="text-xs font-semibold text-slate-900 truncate mb-1.5">${log.title}</h4>
+          <div class="flex items-center justify-between text-[11px] text-slate-500">
+            <span>완료율: <strong class="${rate === 100 ? 'text-emerald-600' : 'text-slate-700'}">${rate}%</strong> (${doneTasks}/${totalTasks})</span>
+            <span class="truncate max-w-[120px] text-slate-400">#${(log.tags && log.tags[0]) || '업무'}</span>
+          </div>
+        `;
+
+        item.addEventListener('click', () => {
+          selectLog(log.id);
+        });
+
+        logListEl.appendChild(item);
+      });
+    }
+
+    function getCategoryBadgeStyle(cat) {
+      switch (cat) {
+        case '개발': return 'bg-blue-100 text-blue-800';
+        case '기획': return 'bg-purple-100 text-purple-800';
+        case '회의': return 'bg-amber-100 text-amber-800';
+        case '운영': return 'bg-emerald-100 text-emerald-800';
+        case '긴급': return 'bg-rose-100 text-rose-800';
+        default: return 'bg-slate-100 text-slate-700';
+      }
+    }
+
+    function selectLog(id) {
+      currentSelectedId = id;
+      const log = logs.find(l => l.id === id);
+      if (!log) return;
+
+      // Switch to View Mode
+      viewModeSec.classList.remove('hidden');
+      editModeSec.classList.add('hidden');
+
+      // Populate View Data
+      viewTitle.textContent = log.title;
+      viewAuthor.textContent = log.author || '미지정';
+      viewDateBadge.textContent = log.date;
+      viewTagBadge.textContent = log.category || '일반';
+      viewTagBadge.className = `px-2.5 py-1 rounded-full text-xs font-semibold ${getCategoryBadgeStyle(log.category)}`;
+      
+      const totalTasks = log.tasks ? log.tasks.length : 0;
+      const doneTasks = log.tasks ? log.tasks.filter(t => t.done).length : 0;
+      const rate = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+      viewProgressRate.textContent = `${rate}% (${doneTasks}/${totalTasks} 완료)`;
+      viewProgressRate.className = `ml-1 font-semibold ${rate === 100 ? 'text-emerald-600' : 'text-indigo-600'}`;
+
+      viewTagsText.textContent = log.tags && log.tags.length ? log.tags.map(t => `#${t}`).join(', ') : '없음';
+      viewKeyGoal.textContent = log.keyGoal || '작성된 핵심 목표가 없습니다.';
+      viewIssues.textContent = log.issues || '특이사항 및 이슈 사항이 없습니다.';
+      viewTomorrow.textContent = log.tomorrow || '작성된 예정 업무가 없습니다.';
+      viewLogId.textContent = log.id.slice(-6);
+
+      // Tasks table
+      viewTasksTbody.innerHTML = '';
+      if (log.tasks && log.tasks.length > 0) {
+        log.tasks.forEach((t, idx) => {
+          const tr = document.createElement('tr');
+          tr.className = t.done ? 'bg-slate-50/50' : '';
+          tr.innerHTML = `
+            <td class="px-4 py-3 text-center">
+              <input type="checkbox" ${t.done ? 'checked' : ''} data-task-idx="${idx}" class="task-checkbox rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+            </td>
+            <td class="px-4 py-3 text-xs font-medium text-slate-500 whitespace-nowrap">
+              ${t.time || '-'}
+            </td>
+            <td class="px-4 py-3">
+              <span class="${t.done ? 'line-through text-slate-400' : 'text-slate-800 font-medium'}">${escapeHtml(t.content)}</span>
+            </td>
+            <td class="px-4 py-3 text-xs">
+              <span class="inline-block px-2 py-0.5 rounded font-semibold ${t.progress >= 100 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'}">
+                ${t.progress || 0}%
+              </span>
+            </td>
+          `;
+
+          // Checkbox toggle right in view mode!
+          const chk = tr.querySelector('.task-checkbox');
+          chk.addEventListener('change', (e) => {
+            t.done = e.target.checked;
+            t.progress = t.done ? 100 : 0;
+            saveLogs(false);
+            selectLog(currentSelectedId);
+            renderLogList();
+          });
+
+          viewTasksTbody.appendChild(tr);
+        });
+      } else {
+        viewTasksTbody.innerHTML = `<tr><td colspan="4" class="px-4 py-4 text-center text-xs text-slate-400">등록된 세부 업무 항목이 없습니다.</td></tr>`;
+      }
+
+      renderLogList();
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, function(m) {
+        return {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#039;'
+        }[m];
+      });
+    }
+
+    // --- TASK EDITOR ROW BUILDER ---
+    function addTaskEditorRow(task = { done: false, time: '', content: '', progress: 0 }) {
+      const row = document.createElement('div');
+      row.className = 'task-editor-row flex items-center space-x-2 py-1';
+      row.innerHTML = `
+        <div class="w-10 text-center">
+          <input type="checkbox" class="task-row-done rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer" ${task.done ? 'checked' : ''}>
+        </div>
+        <div class="w-28">
+          <input type="text" class="task-row-time w-full text-xs px-2 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500" placeholder="09:00 - 11:00" value="${escapeHtml(task.time || '')}">
+        </div>
+        <div class="flex-1">
+          <input type="text" class="task-row-content w-full text-xs px-2 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500" placeholder="수행한 업무 상세 내용 입력" value="${escapeHtml(task.content || '')}">
+        </div>
+        <div class="w-20">
+          <select class="task-row-progress w-full text-xs px-1.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500 bg-white">
+            <option value="0" ${task.progress == 0 ? 'selected' : ''}>0%</option>
+            <option value="30" ${task.progress == 30 ? 'selected' : ''}>30%</option>
+            <option value="50" ${task.progress == 50 ? 'selected' : ''}>50%</option>
+            <option value="80" ${task.progress == 80 ? 'selected' : ''}>80%</option>
+            <option value="100" ${task.progress == 100 ? 'selected' : ''}>100%</option>
+          </select>
+        </div>
+        <div class="w-10 text-center">
+          <button type="button" class="btn-remove-task-row text-slate-400 hover:text-rose-600 p-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+          </button>
+        </div>
+      `;
+
+      // Auto update progress when checkbox changes
+      const chk = row.querySelector('.task-row-done');
+      const prg = row.querySelector('.task-row-progress');
+      chk.addEventListener('change', () => {
+        if (chk.checked) prg.value = "100";
+      });
+
+      row.querySelector('.btn-remove-task-row').addEventListener('click', () => {
+        row.remove();
+      });
+
+      tasksEditorList.appendChild(row);
+    }
+
+    // --- FORM ACTIONS ---
+    function openNewLogForm() {
+      currentSelectedId = null;
+      viewModeSec.classList.add('hidden');
+      editModeSec.classList.remove('hidden');
+
+      editFormHeading.textContent = '새 업무일지 작성';
+      formLogId.value = '';
+      
+      const todayStr = new Date().toISOString().split('T')[0];
+      formDate.value = todayStr;
+      formTitle.value = `${todayStr} 일일 업무일지`;
+      formAuthor.value = logs[0]?.author || '사용자';
+      formCategory.value = '개발';
+      formKeyGoal.value = '';
+      formIssues.value = '';
+      formTomorrow.value = '';
+      formTags.value = '';
+
+      tasksEditorList.innerHTML = '';
+      // Add 3 default rows
+      addTaskEditorRow({ done: false, time: '09:00 - 12:00', content: '', progress: 0 });
+      addTaskEditorRow({ done: false, time: '13:00 - 15:00', content: '', progress: 0 });
+      addTaskEditorRow({ done: false, time: '15:00 - 18:00', content: '', progress: 0 });
+    }
+
+    function openEditLogForm(id) {
+      const log = logs.find(l => l.id === id);
+      if (!log) return;
+
+      viewModeSec.classList.add('hidden');
+      editModeSec.classList.remove('hidden');
+
+      editFormHeading.textContent = '업무일지 수정';
+      formLogId.value = log.id;
+      formDate.value = log.date;
+      formTitle.value = log.title;
+      formAuthor.value = log.author || '';
+      formCategory.value = log.category || '개발';
+      formKeyGoal.value = log.keyGoal || '';
+      formIssues.value = log.issues || '';
+      formTomorrow.value = log.tomorrow || '';
+      formTags.value = log.tags ? log.tags.join(', ') : '';
+
+      tasksEditorList.innerHTML = '';
+      if (log.tasks && log.tasks.length > 0) {
+        log.tasks.forEach(t => addTaskEditorRow(t));
+      } else {
+        addTaskEditorRow();
+      }
+    }
+
+    function handleSaveLog() {
+      const date = formDate.value;
+      const title = formTitle.value.trim();
+
+      if (!date || !title) {
+        showToast('작성 일자와 일지 제목은 필수 입력 항목입니다.', 'warning');
+        return;
+      }
+
+      // Collect tasks
+      const taskRows = tasksEditorList.querySelectorAll('.task-editor-row');
+      const tasks = [];
+      taskRows.forEach(row => {
+        const content = row.querySelector('.task-row-content').value.trim();
+        if (content) {
+          tasks.push({
+            done: row.querySelector('.task-row-done').checked,
+            time: row.querySelector('.task-row-time').value.trim(),
+            content: content,
+            progress: parseInt(row.querySelector('.task-row-progress').value, 10) || 0
+          });
+        }
+      });
+
+      const tags = formTags.value
+        .split(',')
+        .map(t => t.trim().replace(/^#/, ''))
+        .filter(t => t.length > 0);
+
+      const logId = formLogId.value;
+
+      if (logId) {
+        // Update existing
+        const idx = logs.findIndex(l => l.id === logId);
+        if (idx !== -1) {
+          logs[idx] = {
+            ...logs[idx],
+            date,
+            title,
+            author: formAuthor.value.trim(),
+            category: formCategory.value,
+            keyGoal: formKeyGoal.value.trim(),
+            tasks,
+            issues: formIssues.value.trim(),
+            tomorrow: formTomorrow.value.trim(),
+            tags,
+            updatedAt: new Date().toISOString().replace('T', ' ').slice(0, 19)
+          };
+          saveLogs(true);
+          selectLog(logId);
+        }
+      } else {
+        // Create new
+        const newId = `log-${Date.now()}`;
+        const newLog = {
+          id: newId,
+          date,
+          title,
+          author: formAuthor.value.trim(),
+          category: formCategory.value,
+          keyGoal: formKeyGoal.value.trim(),
+          tasks,
+          issues: formIssues.value.trim(),
+          tomorrow: formTomorrow.value.trim(),
+          tags,
+          updatedAt: new Date().toISOString().replace('T', ' ').slice(0, 19)
+        };
+        logs.unshift(newLog);
+        saveLogs(true);
+        selectLog(newId);
+      }
+    }
+
+    // --- EXPORT & BACKUP ACTIONS ---
+    function downloadJsonBackup() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(logs, null, 2));
+      const downloadAnchor = document.createElement('a');
+      const nowStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `worklog_backup_${nowStr}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast('전체 백업 파일(.json)이 다운로드되었습니다.', 'success');
+    }
+
+    function restoreFromJsonFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (Array.isArray(parsed)) {
+            logs = parsed;
+            saveLogs(false);
+            if (logs.length > 0) {
+              selectLog(logs[0].id);
+            }
+            renderLogList();
+            modalBackup.classList.add('hidden');
+            showToast(`${logs.length}개의 업무일지 복원이 완료되었습니다!`, 'success');
+          } else {
+            showToast('올바른 업무일지 백업 파일 형식이 아닙니다.', 'error');
+          }
+        } catch (err) {
+          showToast('백업 파일 해석 중 오류가 발생했습니다.', 'error');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function copyToClipboard(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('클립보드에 복사되었습니다.', 'success');
+        }).catch(() => {
+          fallbackCopyText(text);
+        });
+      } else {
+        fallbackCopyText(text);
+      }
+    }
+
+    function fallbackCopyText(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        showToast('클립보드에 복사되었습니다.', 'success');
+      } catch (err) {
+        showToast('복사에 실패했습니다.', 'error');
+      }
+      document.body.removeChild(textarea);
+    }
+
+    function generateCurrentMarkdown() {
+      const log = logs.find(l => l.id === currentSelectedId);
+      if (!log) return '';
+      let md = `# ${log.title}\n\n`;
+      md += `- **작성일자:** ${log.date}\n`;
+      md += `- **작성자:** ${log.author || '미지정'}\n`;
+      md += `- **카테고리:** ${log.category}\n`;
+      md += `- **태그:** ${log.tags ? log.tags.join(', ') : '없음'}\n\n`;
+      md += `## 1. 오늘의 핵심 목표\n${log.keyGoal || '없음'}\n\n`;
+      md += `## 2. 주요 업무 진행 내역\n`;
+      if (log.tasks && log.tasks.length > 0) {
+        log.tasks.forEach(t => {
+          md += `- [${t.done ? 'x' : ' '}] (${t.time || '-'}) ${t.content} [${t.progress}%]\n`;
+        });
+      } else {
+        md += `- 등록된 업무 없음\n`;
+      }
+      md += `\n## 3. 특이사항 및 이슈\n${log.issues || '없음'}\n\n`;
+      md += `## 4. 내일 예정 업무\n${log.tomorrow || '없음'}\n`;
+      return md;
+    }
+
+    // --- EVENT LISTENERS INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+      loadLogs();
+
+      // Top Actions
+      document.getElementById('btn-new-log-top').addEventListener('click', openNewLogForm);
+      document.getElementById('btn-open-backup').addEventListener('click', () => modalBackup.classList.remove('hidden'));
+      document.getElementById('btn-close-backup-modal').addEventListener('click', () => modalBackup.classList.add('hidden'));
+      document.getElementById('btn-close-backup-footer').addEventListener('click', () => modalBackup.classList.add('hidden'));
+
+      document.getElementById('btn-guide').addEventListener('click', () => modalGuide.classList.remove('hidden'));
+      document.getElementById('btn-close-guide-modal').addEventListener('click', () => modalGuide.classList.add('hidden'));
+      document.getElementById('btn-close-guide-footer').addEventListener('click', () => modalGuide.classList.add('hidden'));
+
+      btnCloseBanner.addEventListener('click', () => safetyBanner.classList.add('hidden'));
+
+      // Search & Filter
+      inputSearch.addEventListener('input', (e) => {
+        searchQuery = e.target.value;
+        btnClearSearch.classList.toggle('hidden', !searchQuery);
+        renderLogList();
+      });
+
+      btnClearSearch.addEventListener('click', () => {
+        inputSearch.value = '';
+        searchQuery = '';
+        btnClearSearch.classList.add('hidden');
+        renderLogList();
+      });
+
+      categoryFilterContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('filter-pill')) {
+          categoryFilterContainer.querySelectorAll('.filter-pill').forEach(btn => {
+            btn.classList.remove('active', 'bg-indigo-600', 'text-white');
+            btn.classList.add('bg-slate-100', 'text-slate-600');
+          });
+          e.target.classList.add('active', 'bg-indigo-600', 'text-white');
+          e.target.classList.remove('bg-slate-100', 'text-slate-600');
+          activeFilterCategory = e.target.dataset.cat;
+          renderLogList();
+        }
+      });
+
+      // View Mode buttons
+      document.getElementById('btn-edit-current').addEventListener('click', () => {
+        if (currentSelectedId) openEditLogForm(currentSelectedId);
+      });
+
+      document.getElementById('btn-copy-markdown').addEventListener('click', () => {
+        const md = generateCurrentMarkdown();
+        copyToClipboard(md);
+      });
+
+      document.getElementById('btn-print-current').addEventListener('click', () => {
+        window.print();
+      });
+
+      document.getElementById('btn-delete-current').addEventListener('click', () => {
+        if (!currentSelectedId) return;
+        openConfirm('업무일지 삭제', '정말 이 업무일지를 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.', () => {
+          logs = logs.filter(l => l.id !== currentSelectedId);
+          saveLogs(false);
+          showToast('업무일지가 삭제되었습니다.', 'info');
+          if (logs.length > 0) {
+            selectLog(logs[0].id);
+          } else {
+            openNewLogForm();
+          }
+          renderLogList();
+        });
+      });
+
+      // Edit Mode buttons
+      document.getElementById('btn-cancel-edit').addEventListener('click', () => {
+        if (currentSelectedId) {
+          selectLog(currentSelectedId);
+        } else if (logs.length > 0) {
+          selectLog(logs[0].id);
+        }
+      });
+
+      document.getElementById('btn-save-log').addEventListener('click', handleSaveLog);
+      document.getElementById('btn-add-task-row').addEventListener('click', () => addTaskEditorRow());
+
+      // Backup & Restore handlers
+      document.getElementById('btn-quick-export-all').addEventListener('click', downloadJsonBackup);
+      document.getElementById('btn-download-json-backup').addEventListener('click', downloadJsonBackup);
+      
+      document.getElementById('input-restore-file').addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+          restoreFromJsonFile(e.target.files[0]);
+        }
+      });
+
+      document.getElementById('btn-copy-all-clipboard').addEventListener('click', () => {
+        copyToClipboard(JSON.stringify(logs, null, 2));
+      });
+
+      // Confirm modal buttons
+      document.getElementById('btn-confirm-cancel').addEventListener('click', () => {
+        modalConfirm.classList.add('hidden');
+        confirmCallback = null;
+      });
+
+      document.getElementById('btn-confirm-ok').addEventListener('click', () => {
+        if (confirmCallback) confirmCallback();
+        modalConfirm.classList.add('hidden');
+        confirmCallback = null;
+      });
+
+      // Initial Select
+      if (logs.length > 0) {
+        selectLog(logs[0].id);
+      } else {
+        openNewLogForm();
+      }
+    });
+  </script>
+</body>
+</html>
