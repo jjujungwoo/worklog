@@ -346,75 +346,125 @@
         <!-- DIVIDER -->
         <div class="pt-6 border-t border-slate-200"></div>
 
-        <!-- BOTTOM SECTION: 월말 보고용 업무 통계 요약 (완벽한 가로형 쾌적 레이아웃) -->
+        <!-- BOTTOM SECTION: 월말 보고용 업무 통계 요약 (사용자 맞춤형 정돈 레이아웃) -->
         <div class="monthly-report-section bg-slate-50/95 border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-xs">
-          <!-- Header Bar: Title on Left, Controls on Right (No wrapping) -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-200/70">
-            <div class="flex items-center space-x-2.5">
-              <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center flex-shrink-0">
+          
+          <!-- 1. Top Section: Title & Subtitle across full width (No cramped wrapping) -->
+          <div class="pb-3 mb-3 border-b border-slate-200/70">
+            <div class="flex items-center space-x-2.5 mb-1">
+              <div class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center flex-shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                 </svg>
               </div>
-              <div>
-                <h3 id="monthly-report-title" class="text-base font-bold text-slate-900 tracking-tight">월말 업무 처리 통계 (월말 보고용)</h3>
-                <p class="text-xs text-slate-500 mt-0.5">선택한 월의 8대 담당 영역별 처리 실적 자동 집계</p>
-              </div>
+              <h3 id="monthly-report-title" class="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight whitespace-nowrap">2026년 11월 업무 처리 통계 (월말 보고용)</h3>
             </div>
-            
-            <div class="flex items-center space-x-2 no-print flex-shrink-0">
-              <select id="select-report-month" class="text-xs bg-white border border-slate-300 rounded-lg px-3 py-2 font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs cursor-pointer">
-                <!-- Dynamically populated months -->
-              </select>
-              <button id="btn-copy-monthly-report" class="inline-flex items-center text-xs font-semibold px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-2xs transition-colors whitespace-nowrap" title="월말 보고서 텍스트 복사">
-                📋 보고 텍스트 복사
-              </button>
-            </div>
+            <!-- Subtitle placed directly underneath the title -->
+            <p class="text-xs text-slate-500 pl-9.5">선택한 월의 8대 담당 영역별 처리 실적 자동 집계</p>
           </div>
 
-          <!-- Top Highlight Summary: Total Count Callout -->
+          <!-- 2. Controls Row: [Month Select] and [Copy Report Button] placed below the title -->
+          <div class="flex items-center space-x-2.5 mb-4 no-print">
+            <select id="select-report-month" class="text-xs bg-white border border-slate-300 rounded-lg px-3 py-2 font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs cursor-pointer">
+              <!-- Dynamically populated months -->
+            </select>
+            <button id="btn-copy-monthly-report" class="inline-flex items-center text-xs font-semibold px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-2xs transition-colors whitespace-nowrap">
+              📋 보고 텍스트 복사
+            </button>
+          </div>
+
+          <!-- 3. Highlight Callout: Total Monthly Count -->
           <div class="flex items-center justify-between bg-white px-4 py-3 rounded-xl border border-blue-200/80 mb-3 shadow-2xs">
             <span class="text-xs sm:text-sm font-bold text-slate-700">당월 총 처리 실적</span>
-            <div class="flex items-baseline space-x-1">
+            <div class="flex items-baseline space-x-1 whitespace-nowrap">
               <span id="bottom-month-total" class="text-2xl font-black text-blue-700">0</span>
               <span class="text-xs font-bold text-blue-700">건 완료</span>
             </div>
           </div>
 
-          <!-- Clean Horizontal Metric Grid (2 columns on mobile, 4 on desktop, never cramped) -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-4">
-            <div class="bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/80 flex items-center justify-between shadow-2xs">
-              <span class="text-xs font-bold text-blue-700">컴퓨터/전산</span>
-              <span id="bottom-month-pc" class="text-sm font-extrabold text-slate-900">0건</span>
+          <!-- 4. Metric Cards Grid: 위/아래 2줄 배치 (이름 위, 건수 아래로 널찍하고 깔끔하게) -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+            
+            <div class="bg-white p-3.5 rounded-xl border border-blue-100 flex flex-col justify-between shadow-2xs hover:border-blue-300 transition-colors">
+              <div class="flex items-center space-x-1.5 mb-1.5">
+                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                <span class="text-xs font-bold text-slate-700 truncate">컴퓨터/전산</span>
+              </div>
+              <div class="text-right">
+                <span id="bottom-month-pc" class="text-xl font-black text-blue-700 tracking-tight font-mono">0건</span>
+              </div>
             </div>
-            <div class="bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/80 flex items-center justify-between shadow-2xs">
-              <span class="text-xs font-bold text-purple-700">네트워크</span>
-              <span id="bottom-month-net" class="text-sm font-extrabold text-slate-900">0건</span>
+
+            <div class="bg-white p-3.5 rounded-xl border border-purple-100 flex flex-col justify-between shadow-2xs hover:border-purple-300 transition-colors">
+              <div class="flex items-center space-x-1.5 mb-1.5">
+                <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                <span class="text-xs font-bold text-slate-700 truncate">네트워크</span>
+              </div>
+              <div class="text-right">
+                <span id="bottom-month-net" class="text-xl font-black text-purple-700 tracking-tight font-mono">0건</span>
+              </div>
             </div>
-            <div class="bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/80 flex items-center justify-between shadow-2xs">
-              <span class="text-xs font-bold text-rose-700">출입/전자출결</span>
-              <span id="bottom-month-access" class="text-sm font-extrabold text-slate-900">0건</span>
+
+            <div class="bg-white p-3.5 rounded-xl border border-rose-100 flex flex-col justify-between shadow-2xs hover:border-rose-300 transition-colors">
+              <div class="flex items-center space-x-1.5 mb-1.5">
+                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                <span class="text-xs font-bold text-slate-700 truncate">출입/전자출결</span>
+              </div>
+              <div class="text-right">
+                <span id="bottom-month-access" class="text-xl font-black text-rose-700 tracking-tight font-mono">0건</span>
+              </div>
             </div>
-            <div class="bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/80 flex items-center justify-between shadow-2xs">
-              <span class="text-xs font-bold text-indigo-700">교탁/기자재/악기</span>
-              <span id="bottom-month-printer" class="text-sm font-extrabold text-slate-900">0건</span>
+
+            <div class="bg-white p-3.5 rounded-xl border border-indigo-100 flex flex-col justify-between shadow-2xs hover:border-indigo-300 transition-colors">
+              <div class="flex items-center space-x-1.5 mb-1.5">
+                <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                <span class="text-xs font-bold text-slate-700 truncate">교탁/기자재/악기</span>
+              </div>
+              <div class="text-right">
+                <span id="bottom-month-printer" class="text-xl font-black text-indigo-700 tracking-tight font-mono">0건</span>
+              </div>
             </div>
-            <div class="bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/80 flex items-center justify-between shadow-2xs">
-              <span class="text-xs font-bold text-amber-700">승강기</span>
-              <span id="bottom-month-sw" class="text-sm font-extrabold text-slate-900">0건</span>
+
+            <div class="bg-white p-3.5 rounded-xl border border-amber-100 flex flex-col justify-between shadow-2xs hover:border-amber-300 transition-colors">
+              <div class="flex items-center space-x-1.5 mb-1.5">
+                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                <span class="text-xs font-bold text-slate-700 truncate">승강기</span>
+              </div>
+              <div class="text-right">
+                <span id="bottom-month-sw" class="text-xl font-black text-amber-700 tracking-tight font-mono">0건</span>
+              </div>
             </div>
-            <div class="bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/80 flex items-center justify-between shadow-2xs">
-              <span class="text-xs font-bold text-emerald-700">정수기/환경가전</span>
-              <span id="bottom-month-facility" class="text-sm font-extrabold text-slate-900">0건</span>
+
+            <div class="bg-white p-3.5 rounded-xl border border-emerald-100 flex flex-col justify-between shadow-2xs hover:border-emerald-300 transition-colors">
+              <div class="flex items-center space-x-1.5 mb-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span class="text-xs font-bold text-slate-700 truncate">정수기/환경가전</span>
+              </div>
+              <div class="text-right">
+                <span id="bottom-month-facility" class="text-xl font-black text-emerald-700 tracking-tight font-mono">0건</span>
+              </div>
             </div>
-            <div class="bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/80 flex items-center justify-between shadow-2xs">
-              <span class="text-xs font-bold text-cyan-700">전화/통신</span>
-              <span id="bottom-month-tel" class="text-sm font-extrabold text-slate-900">0건</span>
+
+            <div class="bg-white p-3.5 rounded-xl border border-cyan-100 flex flex-col justify-between shadow-2xs hover:border-cyan-300 transition-colors">
+              <div class="flex items-center space-x-1.5 mb-1.5">
+                <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
+                <span class="text-xs font-bold text-slate-700 truncate">전화/통신</span>
+              </div>
+              <div class="text-right">
+                <span id="bottom-month-tel" class="text-xl font-black text-cyan-700 tracking-tight font-mono">0건</span>
+              </div>
             </div>
-            <div class="bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/80 flex items-center justify-between shadow-2xs">
-              <span class="text-xs font-bold text-slate-600">비품/시설/행정</span>
-              <span id="bottom-month-etc" class="text-sm font-extrabold text-slate-900">0건</span>
+
+            <div class="bg-white p-3.5 rounded-xl border border-slate-200 flex flex-col justify-between shadow-2xs hover:border-slate-300 transition-colors">
+              <div class="flex items-center space-x-1.5 mb-1.5">
+                <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                <span class="text-xs font-bold text-slate-700 truncate">비품/시설/행정</span>
+              </div>
+              <div class="text-right">
+                <span id="bottom-month-etc" class="text-xl font-black text-slate-700 tracking-tight font-mono">0건</span>
+              </div>
             </div>
+
           </div>
 
           <!-- Progress bar visualization -->
