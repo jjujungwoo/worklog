@@ -140,67 +140,74 @@
   </div>
 
 
-  <!-- TOP MINIMAL HEADER -->
-  <header class="bg-white border-b border-slate-200/80 sticky top-0 z-30 shadow-xs">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <button id="btn-toggle-sidebar" class="text-slate-500 hover:text-slate-800 p-1.5 rounded-md hover:bg-slate-100 transition-colors" title="날짜 목록 토글">
+  <!-- TOP MINIMAL HEADER (PERFECT SINGLE ROW) -->
+  <header class="bg-white border-b border-slate-200/90 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-6xl mx-auto px-3 sm:px-5 h-14 flex items-center justify-between gap-2 overflow-x-auto">
+      
+      <!-- Left: Logo & Status (One line, no wrap) -->
+      <div class="flex items-center space-x-2.5 flex-shrink-0">
+        <button id="btn-toggle-sidebar" class="text-slate-500 hover:text-slate-800 p-1.5 rounded-lg hover:bg-slate-100 transition-colors" title="기록 날짜 목록 열기/닫기">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
           </svg>
         </button>
-        <span class="text-base font-bold tracking-tight text-slate-900">주정우 업무일지 <span class="text-xs font-normal text-slate-500 ml-1.5">(사무처 관리실)</span></span>
-        <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 hidden sm:inline-flex items-center">
+        
+        <div class="flex items-baseline space-x-1.5 whitespace-nowrap">
+          <span class="text-base font-extrabold tracking-tight text-slate-900">주정우 업무일지</span>
+          <span class="text-xs font-semibold text-slate-500">(사무처 관리실)</span>
+        </div>
+
+        <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/70 inline-flex items-center whitespace-nowrap">
           <span class="w-1.5 h-1.5 mr-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
           자동 저장 활성
         </span>
       </div>
 
-      <div class="flex items-center space-x-1.5 sm:space-x-2">
-        <button id="btn-add-today" class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors" title="오늘 날짜 일지 생성/이동">
+      <!-- Right: Action Buttons (All in one line, no wrapping) -->
+      <div class="flex items-center space-x-1 sm:space-x-1.5 flex-shrink-0 whitespace-nowrap">
+        <button id="btn-add-today" class="inline-flex items-center px-2.5 py-1.5 text-xs font-semibold rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors" title="오늘 날짜 일지 생성/이동">
           <svg class="w-3.5 h-3.5 mr-1 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
           </svg>
           오늘
         </button>
 
-        <!-- STATS BUTTON -->
-        <button id="btn-open-stats-modal" class="inline-flex items-center px-2.5 py-1.5 text-xs font-semibold rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200/70 transition-colors" title="업무 처리 통계 및 분야별 분석 보기">
+        <button id="btn-open-stats-modal" class="inline-flex items-center px-2.5 py-1.5 text-xs font-semibold rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200/80 transition-colors" title="업무 처리 통계 및 분야별 분석 보기">
           <svg class="w-3.5 h-3.5 mr-1 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
           </svg>
           업무 통계
         </button>
 
-        <button id="btn-copy-raw-text" class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 shadow-2xs transition-colors" title="현재 메모 텍스트 복사">
+        <button id="btn-copy-raw-text" class="inline-flex items-center px-2.5 py-1.5 text-xs font-semibold rounded-lg text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 shadow-2xs transition-colors" title="현재 메모 텍스트 복사">
           <svg class="w-3.5 h-3.5 mr-1 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
           </svg>
           텍스트 복사
         </button>
 
-        <button id="btn-open-backup-modal" class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-lg text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/60 transition-colors" title="SSD 고장 대비 백업 및 복원">
+        <button id="btn-open-backup-modal" class="inline-flex items-center px-2.5 py-1.5 text-xs font-semibold rounded-lg text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/80 transition-colors" title="SSD 고장 대비 백업 및 복원">
           <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
           </svg>
           백업 / 복원
         </button>
 
-        <button id="btn-open-pwd-modal" class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 shadow-2xs transition-colors" title="접속 비밀번호 변경">
+        <button id="btn-open-pwd-modal" class="inline-flex items-center px-2.5 py-1.5 text-xs font-semibold rounded-lg text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 shadow-2xs transition-colors" title="접속 비밀번호 변경">
           <svg class="w-3.5 h-3.5 mr-1 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
           </svg>
-          <span class="hidden sm:inline">암호 설정</span>
+          암호 설정
         </button>
 
-        <button id="btn-lock-now" class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-600 hover:bg-slate-100 transition-colors" title="즉시 화면 잠금">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button id="btn-lock-now" class="inline-flex items-center p-1.5 text-xs font-medium rounded-lg text-slate-600 hover:bg-slate-100 transition-colors" title="즉시 화면 잠금">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
           </svg>
         </button>
 
-        <button id="btn-print-doc" class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-600 hover:bg-slate-100 transition-colors" title="인쇄 및 PDF 저장">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button id="btn-print-doc" class="inline-flex items-center p-1.5 text-xs font-medium rounded-lg text-slate-600 hover:bg-slate-100 transition-colors" title="인쇄 및 PDF 저장">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
           </svg>
         </button>
@@ -339,78 +346,82 @@
         <!-- DIVIDER -->
         <div class="pt-6 border-t border-slate-200"></div>
 
-        <!-- BOTTOM SECTION: 월말 보고용 업무 통계 요약 (Monthly Report Summary) -->
-        <div class="monthly-report-section bg-slate-50/90 border border-slate-200/90 rounded-xl p-5 shadow-2xs">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-            <div class="flex items-center space-x-2">
-              <div class="p-1.5 bg-blue-100 text-blue-700 rounded-lg">
+        <!-- BOTTOM SECTION: 월말 보고용 업무 통계 요약 (완벽한 가로형 쾌적 레이아웃) -->
+        <div class="monthly-report-section bg-slate-50/95 border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-xs">
+          <!-- Header Bar: Title on Left, Controls on Right (No wrapping) -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-200/70">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center flex-shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                 </svg>
               </div>
               <div>
-                <h3 class="text-sm font-bold text-slate-900 flex items-center">
-                  <span id="monthly-report-title">월말 업무 보고용 통계 요약</span>
-                </h3>
-                <p class="text-[11px] text-slate-500">선택한 월의 전체 일지 데이터에서 분야별 처리 실적을 자동 집계합니다.</p>
+                <h3 id="monthly-report-title" class="text-base font-bold text-slate-900 tracking-tight">월말 업무 처리 통계 (월말 보고용)</h3>
+                <p class="text-xs text-slate-500 mt-0.5">선택한 월의 8대 담당 영역별 처리 실적 자동 집계</p>
               </div>
             </div>
             
-            <div class="flex items-center space-x-2 no-print">
-              <select id="select-report-month" class="text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-2xs">
+            <div class="flex items-center space-x-2 no-print flex-shrink-0">
+              <select id="select-report-month" class="text-xs bg-white border border-slate-300 rounded-lg px-3 py-2 font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs cursor-pointer">
                 <!-- Dynamically populated months -->
               </select>
-              <button id="btn-copy-monthly-report" class="inline-flex items-center text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-2xs transition-colors" title="월말 보고서 텍스트 복사">
+              <button id="btn-copy-monthly-report" class="inline-flex items-center text-xs font-semibold px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-2xs transition-colors whitespace-nowrap" title="월말 보고서 텍스트 복사">
                 📋 보고 텍스트 복사
               </button>
             </div>
           </div>
 
-          <!-- Metric Badges Grid (8 Specialized Job Domains) -->
-          <div class="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-2 mb-3">
-            <div class="bg-blue-50/70 p-2 rounded-lg border border-blue-200 text-center shadow-2xs">
-              <p class="text-[10px] font-bold text-blue-700">당월 총 처리</p>
-              <p id="bottom-month-total" class="text-base font-extrabold text-blue-700 mt-0.5">0건</p>
+          <!-- Top Highlight Summary: Total Count Callout -->
+          <div class="flex items-center justify-between bg-white px-4 py-3 rounded-xl border border-blue-200/80 mb-3 shadow-2xs">
+            <span class="text-xs sm:text-sm font-bold text-slate-700">당월 총 처리 실적</span>
+            <div class="flex items-baseline space-x-1">
+              <span id="bottom-month-total" class="text-2xl font-black text-blue-700">0</span>
+              <span class="text-xs font-bold text-blue-700">건 완료</span>
             </div>
-            <div class="bg-white p-2 rounded-lg border border-slate-200/80 text-center shadow-2xs">
-              <p class="text-[10px] font-semibold text-blue-700">컴퓨터/전산</p>
-              <p id="bottom-month-pc" class="text-sm sm:text-base font-bold text-slate-800 mt-0.5">0건</p>
+          </div>
+
+          <!-- Clean Horizontal Metric Grid (2 columns on mobile, 4 on desktop, never cramped) -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-4">
+            <div class="bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/80 flex items-center justify-between shadow-2xs">
+              <span class="text-xs font-bold text-blue-700">컴퓨터/전산</span>
+              <span id="bottom-month-pc" class="text-sm font-extrabold text-slate-900">0건</span>
             </div>
-            <div class="bg-white p-2 rounded-lg border border-slate-200/80 text-center shadow-2xs">
-              <p class="text-[10px] font-semibold text-purple-700">네트워크</p>
-              <p id="bottom-month-net" class="text-sm sm:text-base font-bold text-purple-700 mt-0.5">0건</p>
+            <div class="bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/80 flex items-center justify-between shadow-2xs">
+              <span class="text-xs font-bold text-purple-700">네트워크</span>
+              <span id="bottom-month-net" class="text-sm font-extrabold text-slate-900">0건</span>
             </div>
-            <div class="bg-white p-2 rounded-lg border border-slate-200/80 text-center shadow-2xs">
-              <p class="text-[10px] font-semibold text-rose-700">출입/전자출결</p>
-              <p id="bottom-month-access" class="text-sm sm:text-base font-bold text-rose-700 mt-0.5">0건</p>
+            <div class="bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/80 flex items-center justify-between shadow-2xs">
+              <span class="text-xs font-bold text-rose-700">출입/전자출결</span>
+              <span id="bottom-month-access" class="text-sm font-extrabold text-slate-900">0건</span>
             </div>
-            <div class="bg-white p-2 rounded-lg border border-slate-200/80 text-center shadow-2xs">
-              <p class="text-[10px] font-semibold text-indigo-700">교탁/기자재/악기</p>
-              <p id="bottom-month-printer" class="text-sm sm:text-base font-bold text-indigo-700 mt-0.5">0건</p>
+            <div class="bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/80 flex items-center justify-between shadow-2xs">
+              <span class="text-xs font-bold text-indigo-700">교탁/기자재/악기</span>
+              <span id="bottom-month-printer" class="text-sm font-extrabold text-slate-900">0건</span>
             </div>
-            <div class="bg-white p-2 rounded-lg border border-slate-200/80 text-center shadow-2xs">
-              <p class="text-[10px] font-semibold text-amber-700">승강기</p>
-              <p id="bottom-month-sw" class="text-sm sm:text-base font-bold text-amber-700 mt-0.5">0건</p>
+            <div class="bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/80 flex items-center justify-between shadow-2xs">
+              <span class="text-xs font-bold text-amber-700">승강기</span>
+              <span id="bottom-month-sw" class="text-sm font-extrabold text-slate-900">0건</span>
             </div>
-            <div class="bg-white p-2 rounded-lg border border-slate-200/80 text-center shadow-2xs">
-              <p class="text-[10px] font-semibold text-emerald-700">정수기/환경가전</p>
-              <p id="bottom-month-facility" class="text-sm sm:text-base font-bold text-emerald-700 mt-0.5">0건</p>
+            <div class="bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/80 flex items-center justify-between shadow-2xs">
+              <span class="text-xs font-bold text-emerald-700">정수기/환경가전</span>
+              <span id="bottom-month-facility" class="text-sm font-extrabold text-slate-900">0건</span>
             </div>
-            <div class="bg-white p-2 rounded-lg border border-slate-200/80 text-center shadow-2xs">
-              <p class="text-[10px] font-semibold text-cyan-700">전화/통신</p>
-              <p id="bottom-month-tel" class="text-sm sm:text-base font-bold text-cyan-700 mt-0.5">0건</p>
+            <div class="bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/80 flex items-center justify-between shadow-2xs">
+              <span class="text-xs font-bold text-cyan-700">전화/통신</span>
+              <span id="bottom-month-tel" class="text-sm font-extrabold text-slate-900">0건</span>
             </div>
-            <div class="bg-white p-2 rounded-lg border border-slate-200/80 text-center shadow-2xs">
-              <p class="text-[10px] font-semibold text-slate-600">비품/시설/행정</p>
-              <p id="bottom-month-etc" class="text-sm sm:text-base font-bold text-slate-700 mt-0.5">0건</p>
+            <div class="bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/80 flex items-center justify-between shadow-2xs">
+              <span class="text-xs font-bold text-slate-600">비품/시설/행정</span>
+              <span id="bottom-month-etc" class="text-sm font-extrabold text-slate-900">0건</span>
             </div>
           </div>
 
           <!-- Progress bar visualization -->
-          <div class="w-full bg-slate-200/80 rounded-full h-2 flex overflow-hidden mb-2" id="bottom-progress-bar">
+          <div class="w-full bg-slate-200/80 rounded-full h-2.5 flex overflow-hidden mb-2.5" id="bottom-progress-bar">
             <!-- segmented bars -->
           </div>
-          <p id="bottom-bar-legend" class="text-[11px] text-slate-500 flex flex-wrap gap-x-3 gap-y-1">
+          <p id="bottom-bar-legend" class="text-xs text-slate-500 flex flex-wrap gap-x-4 gap-y-1.5 font-medium">
             <!-- legend items -->
           </p>
         </div>
