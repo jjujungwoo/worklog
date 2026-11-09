@@ -1,235 +1,3681 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <title>월간 전산·시설 관리 업무 통계 보고서 - 사무처 관리실 주정우</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>주정우 업무일지 & 통계 대시보드</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: #f8fafc;
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      background-color: #fafafa;
+    }
+    .mono-font {
+      font-family: "JetBrains Mono", monospace;
     }
     @media print {
-      body { background-color: #ffffff; }
-      .no-print { display: none !important; }
-      .print-shadow { box-shadow: none !important; border: none !important; }
-      .page-break { page-break-before: always; }
+      body * {
+        visibility: hidden;
+      }
+      #print-area, #print-area * {
+        visibility: visible;
+      }
+      #print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 24px;
+        background: white;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+    .custom-box {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 1.5px solid #94a3b8;
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      background-color: #ffffff;
+      flex-shrink: 0;
+    }
+    .custom-box:checked {
+      background-color: #3b82f6;
+      border-color: #3b82f6;
+    }
+    .custom-box:checked::after {
+      content: '✓';
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #e2e8f0;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #cbd5e1;
     }
   </style>
 </head>
-<body class="text-slate-800 antialiased p-4 sm:p-8">
-
-  <!-- TOP BAR (NO-PRINT) -->
-  <div class="max-w-4xl mx-auto mb-6 flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200 shadow-sm no-print">
-    <div>
-      <h1 class="text-base font-bold text-slate-900">사무처 관리실 주정우 월간 업무 통계 보고서</h1>
-      <p class="text-xs text-slate-500">결재 및 서면 보고용 A4 최적화 페이지</p>
-    </div>
-    <div class="flex items-center space-x-2">
-      <select id="sel-month" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 font-semibold text-slate-700">
-        <option value="2026.10">2026년 10월 종합 보고서</option>
-        <option value="2026.09">2026년 9월 종합 보고서</option>
-        <option value="2026.11">2026년 11월 누적 보고서</option>
-      </select>
-      <button onclick="window.print()" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-lg shadow-sm transition-colors">
-        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+<body class="text-slate-800 min-h-screen flex flex-col antialiased">
+  <!-- PIN LOCK OVERLAY SCREEN -->
+  <div id="pin-lock-overlay" class="fixed inset-0 z-50 bg-slate-900/95 backdrop-blur-md flex items-center justify-center p-4 transition-opacity duration-300">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 sm:p-8 shadow-2xl border border-slate-200 text-center">
+      <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 mx-auto flex items-center justify-center mb-4 border border-blue-100 shadow-xs">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
         </svg>
-        보고서 인쇄 / PDF 저장
-      </button>
+      </div>
+
+      <h2 class="text-xl font-bold text-slate-900 tracking-tight">주정우 업무일지</h2>
+      <span class="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">사무처 관리실</span>
+      <p class="text-xs text-slate-500 mt-1 mb-6">인가된 사용자만 열람할 수 있도록 암호로 보호되어 있습니다.</p>
+
+      <form id="form-pin-lock" class="space-y-4">
+        <div>
+          <input type="password" id="input-pin-password" autofocus placeholder="접속 비밀번호 입력" autocomplete="current-password" class="w-full text-center tracking-widest text-lg font-bold px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+          <p id="pin-error-msg" class="text-xs text-rose-500 font-medium mt-1.5 hidden">비밀번호가 일치하지 않습니다.</p>
+        </div>
+
+        <button type="submit" id="btn-submit-pin" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-sm transition-colors">
+          확인 및 잠금 해제
+        </button>
+      </form>
+
+      <div class="mt-6 pt-4 border-t border-slate-100 text-[11px] text-slate-400">
+        <span>기본 비밀번호: <strong class="text-slate-600 font-mono">1234</strong> (접속 후 상단에서 변경 가능)</span>
+      </div>
     </div>
   </div>
 
-  <!-- A4 REPORT SHEET -->
-  <div class="max-w-4xl mx-auto bg-white p-8 sm:p-12 rounded-2xl border border-slate-200 shadow-sm print-shadow">
-    
-    <!-- Header -->
-    <div class="border-b-2 border-blue-900 pb-5 mb-8">
-      <div class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-1.5">정기 업무 실적 및 통계 보고서</div>
-      <div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
-        <h2 id="report-main-title" class="text-2xl sm:text-3xl font-extrabold text-blue-950 tracking-tight">월간 전산·시설 관리 업무 통계 보고서</h2>
-        <span id="report-sub-month" class="text-sm font-semibold text-slate-500">2026년 10월 종합</span>
+  <!-- PASSWORD CHANGE MODAL -->
+  <div id="modal-change-password" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-slate-200">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+        <h3 class="text-sm font-bold text-slate-900">접속 비밀번호 변경</h3>
+        <button id="btn-close-change-pwd" class="text-slate-400 hover:text-slate-600 p-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
       </div>
 
-      <div class="mt-4 pt-3 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-slate-500">
-        <div>• 담당자: <strong class="text-slate-800">주정우</strong></div>
-        <div>• 소속: <strong class="text-slate-800">사무처 관리실</strong></div>
-        <div>• 당월 총 처리: <strong id="lbl-total-count" class="text-blue-600 font-bold">71건 (100% 완료)</strong></div>
-        <div class="text-right sm:text-right">• 보고일자: <strong class="text-slate-800">2026-11-07</strong></div>
-      </div>
+      <form id="form-change-pwd" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">새 비밀번호 입력</label>
+          <input type="password" id="input-new-pwd" placeholder="새로운 비밀번호" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">새 비밀번호 확인</label>
+          <input type="password" id="input-new-pwd-confirm" placeholder="새로운 비밀번호 한 번 더 입력" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm">
+        </div>
+        <p id="pwd-change-error" class="text-rose-500 font-medium hidden">비밀번호가 일치하지 않습니다.</p>
+
+        <div class="pt-2 flex justify-end space-x-2">
+          <button type="button" id="btn-cancel-pwd" class="px-3 py-1.5 border border-slate-300 text-slate-600 rounded-lg hover:bg-slate-50">취소</button>
+          <button type="submit" id="btn-save-new-pwd" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-2xs">비밀번호 저장</button>
+        </div>
+      </form>
     </div>
-
-    <!-- 1. Executive Summary -->
-    <div class="mb-8">
-      <h3 class="text-base font-bold text-blue-950 border-b border-blue-900/40 pb-2 mb-3">1. 월간 업무 총괄 요약</h3>
-      <p id="summary-desc" class="text-sm text-slate-700 leading-relaxed text-justify mb-4">
-        2026년 10월 한 달 동안 관할 8대 직무 영역(컴퓨터/전산, 네트워크, 출입통제·전자출결, 비품·시설, 전화/통신, 전자교탁·기자재·악기, 정수기·환경가전, 승강기) 전반에 걸쳐 총 71건의 유지보수 및 긴급 장애 요청을 접수하여 전건 정상 조치를 완료하였습니다. 9월 개강 초기 집중되었던 출입 및 신규 계정 요청이 안정화되면서 10월에는 업무용 PC 하드웨어 정비와 교내 고속 무선망 전환 작업이 중심을 이루었습니다.
-      </p>
-
-      <!-- 8 Domain Metric Cards -->
-      <div id="domain-cards-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-        <!-- Dynamically populated -->
-      </div>
-    </div>
-
-    <!-- 2. Quantitative Breakdown Table -->
-    <div class="mb-8">
-      <h3 class="text-base font-bold text-blue-950 border-b border-blue-900/40 pb-2 mb-3">2. 8대 직무 영역별 상세 집계</h3>
-      <div class="border border-slate-200 rounded-lg overflow-hidden">
-        <table class="min-w-full divide-y divide-slate-200 text-xs sm:text-sm">
-          <thead class="bg-slate-50 text-slate-700 font-semibold">
-            <tr>
-              <th class="px-3.5 py-2.5 text-center w-12">No</th>
-              <th class="px-3.5 py-2.5 text-left w-36">관리 직무 분야</th>
-              <th class="px-3.5 py-2.5 text-center w-24">처리 건수</th>
-              <th class="px-3.5 py-2.5 text-center w-24">비중 (%)</th>
-              <th class="px-3.5 py-2.5 text-left">주요 수행 내역 및 조치 결과</th>
-            </tr>
-          </thead>
-          <tbody id="table-domain-rows" class="divide-y divide-slate-100 bg-white">
-            <!-- Dynamically populated -->
-          </tbody>
-          <tfoot class="bg-blue-50/60 font-bold text-blue-950">
-            <tr>
-              <td colspan="2" class="px-3.5 py-2.5 text-center">합 계</td>
-              <td id="tfoot-total-count" class="px-3.5 py-2.5 text-center">71건</td>
-              <td class="px-3.5 py-2.5 text-center">100.0%</td>
-              <td class="px-3.5 py-2.5">당월 접수 요청 전건 100% 정상 조치 완료</td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-    </div>
-
-    <!-- 3. Key Timeline -->
-    <div class="mb-8">
-      <h3 class="text-base font-bold text-blue-950 border-b border-blue-900/40 pb-2 mb-3">3. 주요 일자별 집중 조치 및 프로젝트 실적</h3>
-      <div class="border border-slate-200 rounded-lg overflow-hidden">
-        <table class="min-w-full divide-y divide-slate-200 text-xs sm:text-sm">
-          <thead class="bg-slate-50 text-slate-700 font-semibold">
-            <tr>
-              <th class="px-3.5 py-2.5 text-left w-28">일 자</th>
-              <th class="px-3.5 py-2.5 text-left w-36">관할 영역</th>
-              <th class="px-3.5 py-2.5 text-left">상세 조치 및 작업 내용</th>
-            </tr>
-          </thead>
-          <tbody id="table-timeline-rows" class="divide-y divide-slate-100 bg-white">
-            <!-- Dynamically populated -->
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- 4. Notes & Signatures -->
-    <div class="pt-4 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-500 gap-3">
-      <div>
-        <span>• 데이터 출처: 주정우 업무일지 시스템 실시간 기록 데이터</span>
-      </div>
-      <div class="text-right font-medium text-slate-700">
-        보고자: 사무처 관리실 주정우 (서명/인)
-      </div>
-    </div>
-
   </div>
 
-  <!-- SCRIPT -->
-  <script>
-    const ALL_DATA = [{"id": "date-20261106", "dateTitle": "2026.11.06(금)", "sections": {"today": [{"done": true, "text": "전체 업무일지 데이터베이스 마이그레이션 완료"}, {"done": false, "text": "전산/시설 상시 모니터링"}], "tomorrow": [{"done": false, "text": "주간 업무 실적 검토"}], "daily": [{"done": true, "text": "서버실 및 네트워크 가동 상태 확인"}], "thisWeek": [{"done": true, "text": "전산/시설 누적 데이터 백업 확립"}], "someday": [{"done": false, "text": "도서관 및 디지털존 잔여 라인 정비"}]}, "doneWork": [{"text": "전산/시설 업무일지 시스템 구축 및 GitHub Pages 배포 완료", "category": "컴퓨터/전산"}, {"text": "9월, 10월, 11월 누적 업무일지 데이터 일괄 변환 및 백업", "category": "컴퓨터/전산"}]}, {"id": "date-20261105", "dateTitle": "2026.11.05(목)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "세교협 보일러제어 컴퓨터 교체", "category": "컴퓨터/전산"}]}, {"id": "date-20261104", "dateTitle": "2026.11.04(수)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "김효숙교수 프린터 연결", "category": "컴퓨터/전산"}, {"text": "교육혁신처조교 컴퓨터 연결", "category": "컴퓨터/전산"}, {"text": "디지털존 14번 와이파이 연결", "category": "네트워크"}, {"text": "디지털존 10번 와이파이 연결", "category": "네트워크"}, {"text": "도서관 랜선 라인 서버실 제거", "category": "네트워크"}, {"text": "이지현교수 프린터 스풀러 해재", "category": "컴퓨터/전산"}, {"text": "이예주 아웃룩 실행안됨 해제", "category": "컴퓨터/전산"}, {"text": "이예주 김채연 전화 연결 완료", "category": "전화/통신"}, {"text": "고경민직원 마우스패드 요청", "category": "컴퓨터/전산"}]}, {"id": "date-20261103", "dateTitle": "2026.11.03(화)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "이수연교수 문 열림", "category": "출입/전자출결"}, {"text": "외국인학생 도서관 열람실 등록", "category": "출입/전자출결"}, {"text": "음향 견적 세교협 국제회의장 예배당 메인스피커", "category": "전자교탁/기자재/악기"}]}, {"id": "date-20261102", "dateTitle": "2026.11.02(월)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "소양관 510호 와이파이 안됨 (알고보니 교탁 인터넷!)", "category": "전자교탁/기자재/악기"}, {"text": "교음과조교실 컴퓨터 안됨", "category": "컴퓨터/전산"}, {"text": "교음과조교실 마우스 요청", "category": "컴퓨터/전산"}, {"text": "하나로mgm과 승강기 관련", "category": "승강기"}, {"text": "전지원계장 프린터 안됨", "category": "컴퓨터/전산"}]}, {"id": "date-20261029", "dateTitle": "2026.10.29(목)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "소양관 503호 인터넷 연결", "category": "네트워크"}, {"text": "소양관 502호 인터넷 연결", "category": "네트워크"}, {"text": "김덕희실장 전화 변경", "category": "전화/통신"}, {"text": "소양관 310호 스피커 안나옴", "category": "전자교탁/기자재/악기"}, {"text": "이상일교수 잡음 들림", "category": "전자교탁/기자재/악기"}, {"text": "교내 정수기 점검 실시", "category": "정수기/환경가전"}]}, {"id": "date-20261028", "dateTitle": "2026.10.28(수)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "소양관 606호 네트워크 연결", "category": "네트워크"}, {"text": "와이파이 5층 안터짐 민원", "category": "네트워크"}, {"text": "이지현교수 한글실행안됨", "category": "컴퓨터/전산"}, {"text": "안현정주임 모니터 안됨", "category": "컴퓨터/전산"}]}, {"id": "date-20261026", "dateTitle": "2026.10.26(월)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "학술연구지원실 위치 이동", "category": "비품/시설/행정"}, {"text": "신현태교수 컴퓨터 램 교체", "category": "컴퓨터/전산"}, {"text": "박윤재 한글 설치", "category": "컴퓨터/전산"}, {"text": "학술연구지원실 프린터 설치", "category": "컴퓨터/전산"}, {"text": "학술연구지원실 위치 이동 관련", "category": "비품/시설/행정"}]}, {"id": "date-20261023", "dateTitle": "2026.10.23(금)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "영성생활관 원격 설정", "category": "컴퓨터/전산"}, {"text": "성지연구원 컴퓨터 설치의뢰", "category": "컴퓨터/전산"}, {"text": "선교관 eps실 배터리 교체", "category": "비품/시설/행정"}, {"text": "오르간 수리 음악관 2015호", "category": "전자교탁/기자재/악기"}, {"text": "엘지 인터넷 전화 실사", "category": "전화/통신"}, {"text": "영성생활관 컴퓨터 설치", "category": "컴퓨터/전산"}, {"text": "모니터 설치 및 불용처리하기 이동처리하기", "category": "컴퓨터/전산"}]}, {"id": "date-20261021", "dateTitle": "2026.10.21(수)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "교음과조교실 프린터 설치", "category": "컴퓨터/전산"}, {"text": "교음과조교실 모니터 교체", "category": "컴퓨터/전산"}, {"text": "학생상담소 인터넷 안됨", "category": "네트워크"}, {"text": "정혜현실장 외장cd롬 대여", "category": "컴퓨터/전산"}, {"text": "문서접수 3건", "category": "비품/시설/행정"}, {"text": "경건훈련원 인터넷 증설 관련 상담", "category": "네트워크"}, {"text": "서문 주차관제 cctv 안됨 - 네트워크 라인 재정비", "category": "네트워크"}, {"text": "교음과조교실 마스터카드 출입권한 재조정", "category": "출입/전자출결"}, {"text": "신현호교수 강제열림 해제", "category": "출입/전자출결"}]}, {"id": "date-20261020", "dateTitle": "2026.10.20(화)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "교육혁신처 프린터 안됨", "category": "컴퓨터/전산"}, {"text": "학생식당 밥 짓는거 안됨", "category": "비품/시설/행정"}, {"text": "교음과조교실 컴퓨터 안됨", "category": "컴퓨터/전산"}, {"text": "학생지원실 인터넷 안됨", "category": "네트워크"}, {"text": "증명발급컴퓨터 안됨", "category": "컴퓨터/전산"}, {"text": "정기묵교수 인터넷 안됨", "category": "네트워크"}]}, {"id": "date-20261019", "dateTitle": "2026.10.19(월)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "강민혜 모니터 깜빡거림", "category": "컴퓨터/전산"}, {"text": "교음과조교실 컴퓨터 교체", "category": "컴퓨터/전산"}, {"text": "통신실 전산교환 컴퓨터 교체", "category": "전화/통신"}, {"text": "증명발급기 인터넷 안됨 dns 변경", "category": "네트워크"}, {"text": "남성혁교수 디엔에스", "category": "네트워크"}, {"text": "이상원교수 디엔에스", "category": "네트워크"}, {"text": "세교협 2층 와이파이 리셋", "category": "네트워크"}, {"text": "윤가화 기도탑 열림 요청", "category": "출입/전자출결"}]}, {"id": "date-20261008", "dateTitle": "2026.10.08(목)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "소양관 403호 네트워크 복구", "category": "네트워크"}, {"text": "승강기 점검", "category": "승강기"}, {"text": "하경택교수 컴퓨터 복원", "category": "컴퓨터/전산"}, {"text": "KT 인터넷 전화 미팅", "category": "전화/통신"}]}, {"id": "date-20261006", "dateTitle": "2026.10.06(월)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "도서관 디지털존 11번, 12번, 10번, 9번, 8번, 1번 초기화", "category": "컴퓨터/전산"}, {"text": "디지털존 유선 라인 제거", "category": "네트워크"}, {"text": "디지털존 내 유선 인터넷선 제거", "category": "네트워크"}, {"text": "교음과조교실 공유폴더 안됨", "category": "네트워크"}, {"text": "학생상담소 컴퓨터 수리 - 부품 주문 후 교체", "category": "컴퓨터/전산"}, {"text": "디지털존 내 프린트존 외부 인터넷 연결", "category": "네트워크"}, {"text": "여학생관 펌프제어 컴퓨터 연결", "category": "컴퓨터/전산"}, {"text": "모니터 1 교체 및 여학생관 cctv모니터 교체", "category": "네트워크"}, {"text": "모니터 폐기처리", "category": "컴퓨터/전산"}, {"text": "김채연 추가모니터 설치", "category": "컴퓨터/전산"}, {"text": "신대원학우회 강제열림 해제", "category": "출입/전자출결"}, {"text": "도서관 박물관 강제열림 해제", "category": "출입/전자출결"}, {"text": "백정진교수 강제열림 해제", "category": "출입/전자출결"}, {"text": "이상원교수 램 교체", "category": "컴퓨터/전산"}, {"text": "학생상담소 컴퓨터 수리 의뢰", "category": "컴퓨터/전산"}]}, {"id": "date-20261001", "dateTitle": "2026.10.01(목)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "디지털존 국회원문 2, 4번 초기화 및 와이파이 연결", "category": "네트워크"}, {"text": "디지털존 6번, 7번 초기화 및 와이파이 연결", "category": "네트워크"}, {"text": "지하1층 검색PC 3대 초기화 및 와이파이 연결", "category": "네트워크"}, {"text": "조윤정 스캔 설정", "category": "컴퓨터/전산"}, {"text": "언어교육원 네트워크 안됨 문제", "category": "네트워크"}, {"text": "소양관 105호 수유실 문 안열림", "category": "출입/전자출결"}, {"text": "음악관 1007호 문 안열림", "category": "출입/전자출결"}]}, {"id": "date-20260930", "dateTitle": "2026.09.30(수)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "주우영 스캔 안됨 원격 설정", "category": "컴퓨터/전산"}, {"text": "고경민 종합정보 안됨 bde설정", "category": "컴퓨터/전산"}, {"text": "안현정 오피스365 변경", "category": "컴퓨터/전산"}, {"text": "조수연 오피스365 변경", "category": "컴퓨터/전산"}, {"text": "김해나 오피스365", "category": "컴퓨터/전산"}, {"text": "김해나 시작시 오류 뜸 증상", "category": "컴퓨터/전산"}, {"text": "언어교육원 인터넷 설정", "category": "네트워크"}, {"text": "지하1층 열람pc 4번 유선 제거", "category": "네트워크"}, {"text": "1층 디지털존 열람pc 4번 유선 제거", "category": "네트워크"}, {"text": "김해나 한글 안됨 2024 설치 및 dism 복구 작업 실시", "category": "컴퓨터/전산"}]}, {"id": "date-20260929", "dateTitle": "2026.09.29(화)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "디지털존 2번, 14번 초기화", "category": "컴퓨터/전산"}, {"text": "학생상담소 모니터 지출결의 문제", "category": "컴퓨터/전산"}, {"text": "교음과조교실 컴퓨터 램 교체", "category": "컴퓨터/전산"}, {"text": "이현민 시간강사 기도탑 출입등록 카드 발급 안내", "category": "출입/전자출결"}, {"text": "영성생활관 811호 강제열림 설정", "category": "출입/전자출결"}, {"text": "안재경과장 와이파이 ip안내", "category": "네트워크"}, {"text": "안윤기교수 선풍기 교체 및 기존 선풍기 폐기처리", "category": "비품/시설/행정"}, {"text": "기독교교육학과실 강제열림 해제", "category": "출입/전자출결"}, {"text": "승강기 비상통화장치 배터리 교체 관련", "category": "승강기"}]}, {"id": "date-20260928", "dateTitle": "2026.09.28(월)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "음악관 1002호 강제열림 설정", "category": "출입/전자출결"}, {"text": "에스원 프로그램 안됨 세콤 문의", "category": "출입/전자출결"}, {"text": "외래강사 출입관련 문의", "category": "출입/전자출결"}, {"text": "승강기 합격증명서 부착", "category": "승강기"}]}, {"id": "date-20260923", "dateTitle": "2026.09.23(수)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "권오성학생 에스원모바일카드", "category": "출입/전자출결"}, {"text": "안정도교수 계단 출입등록", "category": "출입/전자출결"}, {"text": "영성관 202호 강제열림 해제", "category": "출입/전자출결"}, {"text": "디지털존 2번 유선제거 및 와이파이 장착 (국회원문 1번 포함)", "category": "네트워크"}]}, {"id": "date-20260922", "dateTitle": "2026.09.22(화)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "교음과조교실 1002호 강제열림 해제", "category": "출입/전자출결"}, {"text": "영성생활관 2층 강제열림 해제", "category": "출입/전자출결"}, {"text": "영성생활관 4층 강제열림 해제", "category": "출입/전자출결"}, {"text": "김경래교수 프린터 교체", "category": "컴퓨터/전산"}, {"text": "남성현교수 컴퓨터 발자국 제거", "category": "컴퓨터/전산"}, {"text": "한상수 출입카드발급신청", "category": "출입/전자출결"}, {"text": "이은영 엑셀 문제", "category": "컴퓨터/전산"}]}, {"id": "date-20260921", "dateTitle": "2026.09.21(월)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "소양관 506호 인터넷 안됨 라인 빠짐", "category": "네트워크"}, {"text": "이수연교수 프린터 교체", "category": "컴퓨터/전산"}, {"text": "이한나교수 램 재장착", "category": "컴퓨터/전산"}, {"text": "김우식계장, 도현재 출입카드", "category": "출입/전자출결"}, {"text": "교육혁신처 프린터 드라이버 설치", "category": "컴퓨터/전산"}, {"text": "교육혁신처 신규연구원 네트워크 설정", "category": "네트워크"}, {"text": "김채연 컴퓨터 설치", "category": "컴퓨터/전산"}, {"text": "이예주 컴퓨터 철거 및 초기화 실시", "category": "컴퓨터/전산"}]}, {"id": "date-20260918", "dateTitle": "2026.09.18(목)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "윤가화 컴퓨터 점검", "category": "컴퓨터/전산"}, {"text": "예배당의자 지출결의", "category": "비품/시설/행정"}, {"text": "소양관 관리실 컴퓨터 업데이트 끔", "category": "컴퓨터/전산"}, {"text": "소양관 관리실 컴퓨터 추가 설치", "category": "컴퓨터/전산"}]}, {"id": "date-20260917", "dateTitle": "2026.09.17(목)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "강민혜 그래픽 드라이버 다운그레이드", "category": "컴퓨터/전산"}, {"text": "교음과조교실 프린터 연결", "category": "컴퓨터/전산"}, {"text": "소양관 여학생수유실 도어락 건전지 제거", "category": "출입/전자출결"}, {"text": "공기청정기 필터교체 실시", "category": "정수기/환경가전"}, {"text": "예배당 의자 수리", "category": "비품/시설/행정"}]}, {"id": "date-20260916", "dateTitle": "2026.09.16(수)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "교음과조교실 프린터 안됨", "category": "컴퓨터/전산"}, {"text": "교음과조교실 컴퓨터 부팅안됨", "category": "컴퓨터/전산"}, {"text": "문인탁실장 스캔 설정", "category": "컴퓨터/전산"}, {"text": "문인탁실장 램 추가", "category": "컴퓨터/전산"}, {"text": "소양관 101호 강제열림 해제", "category": "출입/전자출결"}, {"text": "음악관 101호 강제열림 해제", "category": "출입/전자출결"}, {"text": "소양관 전자교탁 장애 처리 완료", "category": "전자교탁/기자재/악기"}, {"text": "박선옥계장 인증서 복사 문의", "category": "컴퓨터/전산"}, {"text": "이예주직원 스캔 설정", "category": "컴퓨터/전산"}]}, {"id": "date-20260915", "dateTitle": "2026.09.15(화)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "윤가화 카드 안맞음", "category": "출입/전자출결"}, {"text": "전지원 프린터 토너", "category": "컴퓨터/전산"}, {"text": "학생지원실 복합기 ip안됨", "category": "네트워크"}, {"text": "학생지원실 프린터 수거", "category": "컴퓨터/전산"}, {"text": "pbs 강제열림 해제", "category": "출입/전자출결"}, {"text": "에스원 공사비 지출결의", "category": "출입/전자출결"}]}, {"id": "date-20260914", "dateTitle": "2026.09.14(월)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "텔크 시험장 네트워크 안됨", "category": "네트워크"}, {"text": "소양관 관리실 네트워크 안됨", "category": "네트워크"}, {"text": "소양관 엘리베이터 점검", "category": "승강기"}]}, {"id": "date-20260910", "dateTitle": "2026.09.10(목)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "영성생활관 503호 신현호교수 잠김", "category": "출입/전자출결"}, {"text": "도서관 디지털존 인터넷 안됨 USB형", "category": "네트워크"}, {"text": "박선옥계장 암호 삭제 요청", "category": "컴퓨터/전산"}]}, {"id": "date-20260909", "dateTitle": "2026.09.09(수)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "승강기 점검", "category": "승강기"}, {"text": "소양관 컴퓨터 업데이트 실시", "category": "컴퓨터/전산"}, {"text": "이혜미학생 역사박물관 출입등록", "category": "출입/전자출결"}, {"text": "도서관 승강기 멈춤", "category": "승강기"}, {"text": "김용민과장 스캔 설정", "category": "컴퓨터/전산"}]}, {"id": "date-20260908", "dateTitle": "2026.09.08(화)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "소양관 전망용 엘리베이터 멈춤", "category": "승강기"}, {"text": "분동 관련 지출결의", "category": "비품/시설/행정"}, {"text": "대외협력실 DVD 복사 요청", "category": "컴퓨터/전산"}, {"text": "음악관 강제열림 설정 공문접수", "category": "출입/전자출결"}, {"text": "승강기 안전점검 예정", "category": "승강기"}]}, {"id": "date-20260907", "dateTitle": "2026.09.07(월)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "동문회 컴퓨터 램 재장착", "category": "컴퓨터/전산"}, {"text": "최진봉교수 소리안남 재부팅", "category": "컴퓨터/전산"}, {"text": "영성생활관 엘리베이터 정상작동", "category": "승강기"}, {"text": "음악관 b1001호 도어락 a/s", "category": "출입/전자출결"}, {"text": "김용민과장 스캔 설정", "category": "컴퓨터/전산"}, {"text": "박선옥계장 저장된 암호", "category": "컴퓨터/전산"}]}, {"id": "date-20260904", "dateTitle": "2026.09.04(금)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "교육혁신처 컴퓨터 수령 및 설치", "category": "컴퓨터/전산"}, {"text": "기독교교육연구원 카드 발급 (서가영, 윤이나 외1명)", "category": "출입/전자출결"}, {"text": "소양관 609호 마이크 확인 이상없음", "category": "전자교탁/기자재/악기"}, {"text": "소양관 전망용 엘리베이터 정상작동", "category": "승강기"}, {"text": "윤가화 음악관 강제열림 1주일 연장 공문 발송", "category": "출입/전자출결"}, {"text": "도서관 와이파이 느림증상 AP 1번, 5번 리셋", "category": "네트워크"}, {"text": "소양관 202호 프로젝터 확인 이상 없음", "category": "전자교탁/기자재/악기"}, {"text": "이은영직원 램 교체", "category": "컴퓨터/전산"}]}, {"id": "date-20260903", "dateTitle": "2026.09.03(목)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "성지연구원 컴퓨터 수리", "category": "컴퓨터/전산"}, {"text": "백정진교수 컴퓨터 수리", "category": "컴퓨터/전산"}, {"text": "이혜미학생 박물관 경비권한 설정", "category": "출입/전자출결"}, {"text": "박정훈학생 경비 설정 안됨 해제", "category": "출입/전자출결"}, {"text": "소양관 전망용 엘베 멈춤", "category": "승강기"}, {"text": "영성생활관 엘베 멈춤", "category": "승강기"}, {"text": "교육혁신처 전체 장애학생휴게실 출입권한 부여", "category": "출입/전자출결"}]}, {"id": "date-20260902", "dateTitle": "2026.09.02(수)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "소양관 702호 스피커 수리 의뢰", "category": "전자교탁/기자재/악기"}, {"text": "소양관 706호 프로젝터 및 마이크 확인", "category": "전자교탁/기자재/악기"}, {"text": "생활관 여학생관 방송 노이즈 확인", "category": "전자교탁/기자재/악기"}, {"text": "음악관 b1022 전자칠판 이상 없음", "category": "전자교탁/기자재/악기"}, {"text": "김제니교수 안열림 에스원 a/s", "category": "출입/전자출결"}, {"text": "여학생관 스피커 잡음 문의 (노이즈 체크)", "category": "전자교탁/기자재/악기"}, {"text": "백정진교수 컴퓨터 수거 (디스크 교체)", "category": "컴퓨터/전산"}, {"text": "김기현대대장 열람실 출입등록 요청", "category": "출입/전자출결"}, {"text": "유선희교수 프린터 드라이버 재설치", "category": "네트워크"}, {"text": "윤가화 에스원 권한문의", "category": "출입/전자출결"}]}, {"id": "date-20260901", "dateTitle": "2026.09.01(화)", "sections": {"today": [{"done": false, "text": ""}], "tomorrow": [{"done": false, "text": ""}], "daily": [{"done": false, "text": ""}], "thisWeek": [{"done": false, "text": ""}], "someday": [{"done": false, "text": ""}]}, "doneWork": [{"text": "백정진교수 컴퓨터 문제 점검", "category": "컴퓨터/전산"}, {"text": "교음과조교실 프린트 문제 해결", "category": "컴퓨터/전산"}, {"text": "이은혜 원격 안내 및 프린터 양면 설정", "category": "컴퓨터/전산"}, {"text": "배윤주학생 출입등록 (에스원)", "category": "출입/전자출결"}, {"text": "교음과조교실 출입권한 문의", "category": "출입/전자출결"}, {"text": "교육혁신처 조교 컴퓨터 교체 및 OS 설치", "category": "컴퓨터/전산"}]}];
 
-    const DOMAIN_INFO = {
-      '컴퓨터/전산': { color: 'text-blue-700', bg: 'bg-blue-50', border: 'border-blue-200', note: '교수 연구실 램 교체, 디스크 수리, OS 및 한글/오피스 오류 복원' },
-      '네트워크': { color: 'text-purple-700', bg: 'bg-purple-50', border: 'border-purple-200', note: '디지털존 와이파이 고속화, 유선 랜선 철거, IP/DNS 충돌 복구' },
-      '출입/전자출결': { color: 'text-rose-700', bg: 'bg-rose-50', border: 'border-rose-200', note: '에스원 모바일카드 발급, 권한 재조정, 연구실 긴급 강제열림 해제' },
-      '비품/시설/행정': { color: 'text-slate-700', bg: 'bg-slate-50', border: 'border-slate-200', note: '학술연구지원실 부서 재배치 지원, 선교관 EPS 배터리 점검' },
-      '전화/통신': { color: 'text-cyan-700', bg: 'bg-cyan-50', border: 'border-cyan-200', note: 'KT 및 엘지 인터넷 전화 실사, 교환 컴퓨터 관리, 신규 회선 연결' },
-      '전자교탁/기자재/악기': { color: 'text-indigo-700', bg: 'bg-indigo-50', border: 'border-indigo-200', note: '전자교탁 시스템 점검, 음악관 2015호 파이프 오르간 수리' },
-      '정수기/환경가전': { color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200', note: '교내 정수기, 비데, 연수기, 공기청정기 필터 및 위생 정기 점검' },
-      '승강기': { color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-200', note: '교내 전체 승강기 정기 안전점검 입회 및 비상통화장치 동작 확인' }
-    };
+  <!-- TOP MINIMAL HEADER -->
+  <header class="bg-white border-b border-slate-200/80 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <button id="btn-toggle-sidebar" class="text-slate-500 hover:text-slate-800 p-1.5 rounded-md hover:bg-slate-100 transition-colors" title="날짜 목록 토글">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path>
+          </svg>
+        </button>
+        <span class="text-base font-bold tracking-tight text-slate-900">주정우 업무일지 <span class="text-xs font-normal text-slate-500 ml-1.5">(사무처 관리실)</span></span>
+        <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 hidden sm:inline-flex items-center">
+          <span class="w-1.5 h-1.5 mr-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+          자동 저장 활성
+        </span>
+      </div>
 
-    function renderReport(monthKey) {
-      const filtered = ALL_DATA.filter(e => e.dateTitle.startsWith(monthKey));
-      let totalTasks = 0;
-      const catCounts = {};
-      Object.keys(DOMAIN_INFO).forEach(k => catCounts[k] = 0);
+      <div class="flex items-center space-x-1.5 sm:space-x-2">
+        <button id="btn-add-today" class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors" title="오늘 날짜 일지 생성/이동">
+          <svg class="w-3.5 h-3.5 mr-1 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          오늘
+        </button>
 
-      filtered.forEach(e => {
-        e.doneWork.forEach(w => {
-          if (w.text && w.text.trim()) {
-            totalTasks++;
-            const c = w.category || '비품/시설/행정';
-            catCounts[c] = (catCounts[c] || 0) + 1;
-          }
-        });
-      });
+        <!-- STATS BUTTON -->
+        <button id="btn-open-stats-modal" class="inline-flex items-center px-2.5 py-1.5 text-xs font-semibold rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200/70 transition-colors" title="업무 처리 통계 및 분야별 분석 보기">
+          <svg class="w-3.5 h-3.5 mr-1 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+          </svg>
+          업무 통계
+        </button>
 
-      const [y, m] = monthKey.split('.');
-      document.getElementById('report-sub-month').textContent = `${y}년 ${parseInt(m,10)}월 종합 보고`;
-      document.getElementById('lbl-total-count').textContent = `${totalTasks}건 (100% 완료)`;
-      document.getElementById('tfoot-total-count').textContent = `${totalTasks}건`;
+        <button id="btn-copy-raw-text" class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 shadow-2xs transition-colors" title="현재 메모 텍스트 복사">
+          <svg class="w-3.5 h-3.5 mr-1 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+          </svg>
+          텍스트 복사
+        </button>
 
-      // 1. Metric Cards
-      const cardsGrid = document.getElementById('domain-cards-grid');
-      cardsGrid.innerHTML = '';
-      Object.entries(DOMAIN_INFO).forEach(([cat, info]) => {
-        const count = catCounts[cat] || 0;
-        const pct = totalTasks > 0 ? ((count / totalTasks) * 100).toFixed(1) : '0.0';
-        const card = document.createElement('div');
-        card.className = `p-3 rounded-xl border ${info.border} ${info.bg} flex flex-col justify-between`;
-        card.innerHTML = `
-          <span class="text-[11px] font-semibold text-slate-500">${cat}</span>
-          <div class="flex items-baseline justify-between mt-1.5">
-            <span class="text-xl font-extrabold ${info.color}">${count}건</span>
-            <span class="text-xs font-semibold text-slate-400">${pct}%</span>
+        <button id="btn-open-backup-modal" class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-lg text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/60 transition-colors" title="SSD 고장 대비 백업 및 복원">
+          <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+          </svg>
+          백업 / 복원
+        </button>
+
+        <button id="btn-open-pwd-modal" class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 shadow-2xs transition-colors" title="접속 비밀번호 변경">
+          <svg class="w-3.5 h-3.5 mr-1 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+          </svg>
+          <span class="hidden sm:inline">암호 설정</span>
+        </button>
+
+        <button id="btn-lock-now" class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-600 hover:bg-slate-100 transition-colors" title="즉시 화면 잠금">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+        </button>
+
+        <button id="btn-print-doc" class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded-lg text-slate-600 hover:bg-slate-100 transition-colors" title="인쇄 및 PDF 저장">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN WRAPPER -->
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-6 w-full flex-1 flex flex-col md:flex-row gap-6 relative">
+
+    <!-- SIDEBAR: DATE LIST DRAWER -->
+    <aside id="sidebar-drawer" class="w-full md:w-64 bg-white border border-slate-200/90 rounded-xl p-3 shadow-2xs flex-shrink-0 flex flex-col max-h-[500px] md:max-h-[750px]">
+      <div class="flex items-center justify-between pb-2.5 mb-2 border-b border-slate-100">
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">기록 날짜 목록</span>
+        <button id="btn-new-date-entry" class="text-xs font-medium text-blue-600 hover:text-blue-800 flex items-center">
+          + 날짜 추가
+        </button>
+      </div>
+
+      <div id="date-list-container" class="overflow-y-auto flex-1 space-y-1">
+        <!-- Dynamically rendered date items -->
+      </div>
+
+      <div class="pt-2.5 mt-2 border-t border-slate-100 text-[11px] text-slate-400 flex items-center justify-between">
+        <span id="saved-indicator">저장됨</span>
+        <button id="btn-quick-json-download" class="text-indigo-600 hover:underline">JSON 백업</button>
+      </div>
+    </aside>
+
+    <!-- MAIN NOTE EDITOR -->
+    <main class="flex-1 bg-white border border-slate-200/90 rounded-xl p-6 sm:p-10 shadow-xs flex flex-col min-w-0" id="print-area">
+      
+      <!-- Top Date Header -->
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+        <div>
+          <input type="text" id="entry-date-title" class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight bg-transparent focus:outline-none focus:ring-1 focus:ring-blue-500 rounded px-1 -ml-1 w-full" value="2026.11.04(수)">
+          <p class="text-xs text-slate-400 mt-1">체크박스를 클릭하거나 내용을 바로 수정하세요 (자동 저장됨)</p>
+        </div>
+        <div class="flex items-center space-x-1 no-print">
+          <button id="btn-delete-entry" class="text-xs text-rose-500 hover:text-rose-700 hover:bg-rose-50 px-2 py-1 rounded transition-colors" title="이 날짜 일지 삭제">
+            삭제
+          </button>
+        </div>
+      </div>
+
+      <!-- SECTIONS CONTAINER -->
+      <div class="space-y-6 text-sm text-slate-800 leading-relaxed">
+
+        <!-- SECTION: 오늘 -->
+        <div class="todo-section" data-section="today">
+          <div class="flex items-center justify-between group mb-2">
+            <span class="font-bold text-slate-900 text-base">오늘</span>
+            <button class="btn-add-item text-xs text-blue-600 hover:text-blue-800 no-print" data-section="today">+ 항목 추가</button>
           </div>
-        `;
-        cardsGrid.appendChild(card);
-      });
+          <div class="items-list space-y-2" id="list-today">
+            <!-- items -->
+          </div>
+        </div>
 
-      // 2. Table Rows
-      const tbody = document.getElementById('table-domain-rows');
-      tbody.innerHTML = '';
-      let idx = 1;
-      Object.entries(DOMAIN_INFO).forEach(([cat, info]) => {
-        const count = catCounts[cat] || 0;
-        const pct = totalTasks > 0 ? ((count / totalTasks) * 100).toFixed(1) : '0.0';
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="px-3.5 py-2.5 text-center font-mono text-slate-400">${idx++}</td>
-          <td class="px-3.5 py-2.5 font-bold text-slate-800">${cat}</td>
-          <td class="px-3.5 py-2.5 text-center font-bold font-mono text-blue-700">${count}건</td>
-          <td class="px-3.5 py-2.5 text-center font-mono text-slate-600">${pct}%</td>
-          <td class="px-3.5 py-2.5 text-slate-600">${info.note}</td>
-        `;
-        tbody.appendChild(tr);
-      });
+        <!-- SECTION: 내일 -->
+        <div class="todo-section" data-section="tomorrow">
+          <div class="flex items-center justify-between group mb-2">
+            <span class="font-bold text-slate-900 text-base">내일</span>
+            <button class="btn-add-item text-xs text-blue-600 hover:text-blue-800 no-print" data-section="tomorrow">+ 항목 추가</button>
+          </div>
+          <div class="items-list space-y-2" id="list-tomorrow">
+            <!-- items -->
+          </div>
+        </div>
 
-      // 3. Timeline Rows
-      const timelineTbody = document.getElementById('table-timeline-rows');
-      timelineTbody.innerHTML = '';
-      filtered.slice(0, 8).forEach(e => {
-        const tr = document.createElement('tr');
-        const lines = e.doneWork.filter(w => w.text && w.text.trim());
-        const catSet = Array.from(new Set(lines.map(l => l.category))).slice(0, 3).join(', ');
-        const tasksSummary = lines.map(l => l.text).slice(0, 3).join(' / ') + (lines.length > 3 ? ` 외 ${lines.length - 3}건` : '');
+        <!-- SECTION: 매일 -->
+        <div class="todo-section" data-section="daily">
+          <div class="flex items-center justify-between group mb-2">
+            <span class="font-bold text-slate-900 text-base">매일</span>
+            <button class="btn-add-item text-xs text-blue-600 hover:text-blue-800 no-print" data-section="daily">+ 항목 추가</button>
+          </div>
+          <div class="items-list space-y-2" id="list-daily">
+            <!-- items -->
+          </div>
+        </div>
 
-        tr.innerHTML = `
-          <td class="px-3.5 py-2.5 font-semibold text-slate-800">${e.dateTitle}</td>
-          <td class="px-3.5 py-2.5 text-blue-700 font-medium">${catSet || '일반 지원'}</td>
-          <td class="px-3.5 py-2.5 text-slate-600">${tasksSummary}</td>
-        `;
-        timelineTbody.appendChild(tr);
+        <!-- SECTION: 이번 주 -->
+        <div class="todo-section" data-section="thisWeek">
+          <div class="flex items-center justify-between group mb-2">
+            <span class="font-bold text-slate-900 text-base">이번 주</span>
+            <button class="btn-add-item text-xs text-blue-600 hover:text-blue-800 no-print" data-section="thisWeek">+ 항목 추가</button>
+          </div>
+          <div class="items-list space-y-2" id="list-thisWeek">
+            <!-- items -->
+          </div>
+        </div>
+
+        <!-- SECTION: 언젠가 -->
+        <div class="todo-section" data-section="someday">
+          <div class="flex items-center justify-between group mb-2">
+            <span class="font-bold text-slate-900 text-base">언젠가</span>
+            <button class="btn-add-item text-xs text-blue-600 hover:text-blue-800 no-print" data-section="someday">+ 항목 추가</button>
+          </div>
+          <div class="items-list space-y-2" id="list-someday">
+            <!-- items -->
+          </div>
+        </div>
+
+        <!-- DIVIDER -->
+        <div class="pt-4 border-t border-slate-200"></div>
+
+        <!-- SECTION: 오늘 한 일 (완료된 업무 기록 및 분야별 통계) -->
+        <div class="done-work-section">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2">
+            <div>
+              <span class="font-bold text-slate-900 text-base">
+                오늘 한 일
+              </span>
+              <span id="label-done-date" class="text-xs text-slate-500 ml-1.5">(완료 작업 목록)</span>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+              <span id="badge-daily-stats-pill" class="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold border border-slate-200">
+                처리: 0건
+              </span>
+              <button id="btn-add-done-line" class="text-xs text-blue-600 hover:text-blue-800 font-medium no-print">+ 작업 추가</button>
+            </div>
+          </div>
+
+          <!-- Quick category helper text -->
+          <p class="text-[11px] text-slate-400 mb-3 no-print">
+            💡 태그 클릭 시 <strong>컴퓨터/전산 → 네트워크 → 출입/전자출결 → 전자교탁/기자재/악기 → 승강기 → 정수기/환경가전 → 전화/통신 → 비품/시설/행정</strong> 순서로 분야가 즉시 변경됩니다.
+          </p>
+
+          <div id="list-done-work" class="space-y-2">
+            <!-- Lines of completed work with category badges -->
+          </div>
+        </div>
+
+
+        <!-- DIVIDER -->
+        <div class="pt-6 border-t border-slate-200"></div>
+
+        <!-- BOTTOM SECTION: 월말 보고용 업무 통계 요약 (Monthly Report Summary) -->
+        <div class="monthly-report-section bg-slate-50/90 border border-slate-200/90 rounded-xl p-5 shadow-2xs">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+            <div class="flex items-center space-x-2">
+              <div class="p-1.5 bg-blue-100 text-blue-700 rounded-lg">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-slate-900 flex items-center">
+                  <span id="monthly-report-title">월말 업무 보고용 통계 요약</span>
+                </h3>
+                <p class="text-[11px] text-slate-500">선택한 월의 전체 일지 데이터에서 분야별 처리 실적을 자동 집계합니다.</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center space-x-2 no-print">
+              <select id="select-report-month" class="text-xs bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-2xs">
+                <!-- Dynamically populated months -->
+              </select>
+              <button id="btn-copy-monthly-report" class="inline-flex items-center text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-2xs transition-colors" title="월말 보고서 텍스트 복사">
+                📋 보고 텍스트 복사
+              </button>
+            </div>
+          </div>
+
+          <!-- Metric Badges Grid (8 Specialized Job Domains) -->
+          <div class="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-2 mb-3">
+            <div class="bg-blue-50/70 p-2 rounded-lg border border-blue-200 text-center shadow-2xs">
+              <p class="text-[10px] font-bold text-blue-700">당월 총 처리</p>
+              <p id="bottom-month-total" class="text-base font-extrabold text-blue-700 mt-0.5">0건</p>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-slate-200/80 text-center shadow-2xs">
+              <p class="text-[10px] font-semibold text-blue-700">컴퓨터/전산</p>
+              <p id="bottom-month-pc" class="text-sm sm:text-base font-bold text-slate-800 mt-0.5">0건</p>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-slate-200/80 text-center shadow-2xs">
+              <p class="text-[10px] font-semibold text-purple-700">네트워크</p>
+              <p id="bottom-month-net" class="text-sm sm:text-base font-bold text-purple-700 mt-0.5">0건</p>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-slate-200/80 text-center shadow-2xs">
+              <p class="text-[10px] font-semibold text-rose-700">출입/전자출결</p>
+              <p id="bottom-month-access" class="text-sm sm:text-base font-bold text-rose-700 mt-0.5">0건</p>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-slate-200/80 text-center shadow-2xs">
+              <p class="text-[10px] font-semibold text-indigo-700">교탁/기자재/악기</p>
+              <p id="bottom-month-printer" class="text-sm sm:text-base font-bold text-indigo-700 mt-0.5">0건</p>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-slate-200/80 text-center shadow-2xs">
+              <p class="text-[10px] font-semibold text-amber-700">승강기</p>
+              <p id="bottom-month-sw" class="text-sm sm:text-base font-bold text-amber-700 mt-0.5">0건</p>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-slate-200/80 text-center shadow-2xs">
+              <p class="text-[10px] font-semibold text-emerald-700">정수기/환경가전</p>
+              <p id="bottom-month-facility" class="text-sm sm:text-base font-bold text-emerald-700 mt-0.5">0건</p>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-slate-200/80 text-center shadow-2xs">
+              <p class="text-[10px] font-semibold text-cyan-700">전화/통신</p>
+              <p id="bottom-month-tel" class="text-sm sm:text-base font-bold text-cyan-700 mt-0.5">0건</p>
+            </div>
+            <div class="bg-white p-2 rounded-lg border border-slate-200/80 text-center shadow-2xs">
+              <p class="text-[10px] font-semibold text-slate-600">비품/시설/행정</p>
+              <p id="bottom-month-etc" class="text-sm sm:text-base font-bold text-slate-700 mt-0.5">0건</p>
+            </div>
+          </div>
+
+          <!-- Progress bar visualization -->
+          <div class="w-full bg-slate-200/80 rounded-full h-2 flex overflow-hidden mb-2" id="bottom-progress-bar">
+            <!-- segmented bars -->
+          </div>
+          <p id="bottom-bar-legend" class="text-[11px] text-slate-500 flex flex-wrap gap-x-3 gap-y-1">
+            <!-- legend items -->
+          </p>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- STATS & DASHBOARD MODAL -->
+  <div id="modal-stats" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div class="flex items-center space-x-2">
+          <div class="p-1.5 bg-blue-100 text-blue-600 rounded-lg">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">업무 처리 현황 & 분야별 통계</h3>
+            <p class="text-xs text-slate-500">누적된 모든 일지의 작업 건수와 영역별(PC/네트워크/프린터 등) 분석</p>
+          </div>
+        </div>
+        <button id="btn-close-stats-modal" class="text-slate-400 hover:text-slate-600 p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
+        
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+            <p class="text-[11px] font-semibold text-slate-500">총 처리 작업</p>
+            <p id="stat-total-tasks" class="text-xl sm:text-2xl font-bold text-slate-900 mt-1">0건</p>
+          </div>
+          <div class="p-3 bg-blue-50 rounded-xl border border-blue-100">
+            <p class="text-[11px] font-semibold text-blue-700">오늘 처리 작업</p>
+            <p id="stat-today-tasks" class="text-xl sm:text-2xl font-bold text-blue-700 mt-1">0건</p>
+          </div>
+          <div class="p-3 bg-indigo-50 rounded-xl border border-indigo-100">
+            <p class="text-[11px] font-semibold text-indigo-700">기록된 일수</p>
+            <p id="stat-total-days" class="text-xl sm:text-2xl font-bold text-indigo-700 mt-1">0일</p>
+          </div>
+          <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+            <p class="text-[11px] font-semibold text-emerald-700">일평균 처리</p>
+            <p id="stat-avg-tasks" class="text-xl sm:text-2xl font-bold text-emerald-700 mt-1">0.0건</p>
+          </div>
+        </div>
+
+        <!-- Category Progress Breakdown -->
+        <div class="bg-white border border-slate-200 rounded-xl p-4">
+          <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">분야별 처리 비율 & 건수</h4>
+          <div class="space-y-3" id="stat-categories-list">
+            <!-- Dynamically populated progress bars -->
+          </div>
+        </div>
+
+        <!-- History Summary by Date -->
+        <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+          <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-700">날짜별 처리 건수 내역</span>
+            <span class="text-[11px] text-slate-400">최근 날짜순</span>
+          </div>
+          <div class="max-h-48 overflow-y-auto">
+            <table class="min-w-full divide-y divide-slate-100 text-xs">
+              <thead class="bg-slate-50/50 text-slate-500">
+                <tr>
+                  <th class="px-4 py-2 text-left font-semibold">날짜</th>
+                  <th class="px-4 py-2 text-center font-semibold w-20">처리 건수</th>
+                  <th class="px-4 py-2 text-left font-semibold">분야별 구성</th>
+                </tr>
+              </thead>
+              <tbody id="stat-date-tbody" class="divide-y divide-slate-100">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+        <button id="btn-export-csv" class="inline-flex items-center px-3 py-1.5 text-xs font-medium text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition-colors">
+          <svg class="w-3.5 h-3.5 mr-1 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          보고용 엑셀(CSV) 내보내기
+        </button>
+
+        <button id="btn-close-stats-footer" class="px-4 py-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">
+          닫기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BACKUP & RESTORE MODAL -->
+  <div id="modal-backup" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-xl border border-slate-200 overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <h3 class="text-sm font-bold text-slate-900">데이터 백업 & 복원 (SSD 고장 대비)</h3>
+        <button id="btn-close-backup-modal" class="text-slate-400 hover:text-slate-600 p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-5 space-y-4 text-xs sm:text-sm">
+        <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl">
+          <h4 class="font-bold text-blue-900 mb-1">1. 전체 백업 파일 다운로드 (JSON)</h4>
+          <p class="text-slate-600 text-xs mb-3">지금까지 작성된 모든 날짜의 메모와 통계 데이터를 파일 하나로 내려받아 보관하세요.</p>
+          <button id="btn-download-json" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-xs transition-colors">
+            백업 파일(.json) 다운로드
+          </button>
+        </div>
+
+        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+          <h4 class="font-bold text-slate-900 mb-1">2. 백업 파일로 복원하기</h4>
+          <p class="text-slate-600 text-xs mb-3">새 컴퓨터나 다른 브라우저에서 백업 파일을 불러와 그대로 복구합니다.</p>
+          <label class="block text-center w-full py-2 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-medium rounded-lg cursor-pointer shadow-xs transition-colors">
+            백업 파일 선택 및 복원
+            <input type="file" id="input-backup-file" accept=".json" class="hidden">
+          </label>
+        </div>
+      </div>
+
+      <div class="px-5 py-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <button id="btn-close-backup-footer" class="px-3 py-1.5 text-xs font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">
+          닫기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+  <!-- APPLICATION CODE -->
+  <script>
+    const STORAGE_KEY = 'simple_worklog_notes_v5';
+
+    // CATEGORY DEFINITIONS & STYLES
+    const CATEGORIES = [
+      { key: '컴퓨터/전산', label: '컴퓨터/전산', bg: 'bg-blue-100', text: 'text-blue-800', barBg: 'bg-blue-500' },
+      { key: '네트워크', label: '네트워크', bg: 'bg-purple-100', text: 'text-purple-800', barBg: 'bg-purple-500' },
+      { key: '출입/전자출결', label: '출입/전자출결', bg: 'bg-rose-100', text: 'text-rose-800', barBg: 'bg-rose-500' },
+      { key: '전자교탁/기자재/악기', label: '전자교탁/기자재/악기', bg: 'bg-indigo-100', text: 'text-indigo-800', barBg: 'bg-indigo-500' },
+      { key: '승강기', label: '승강기', bg: 'bg-amber-100', text: 'text-amber-800', barBg: 'bg-amber-500' },
+      { key: '정수기/환경가전', label: '정수기/환경가전', bg: 'bg-emerald-100', text: 'text-emerald-800', barBg: 'bg-emerald-500' },
+      { key: '전화/통신', label: '전화/통신', bg: 'bg-cyan-100', text: 'text-cyan-800', barBg: 'bg-cyan-500' },
+      { key: '비품/시설/행정', label: '비품/시설/행정', bg: 'bg-slate-200', text: 'text-slate-800', barBg: 'bg-slate-500' }
+    ];
+
+    // AUTO CATEGORY DETECTION
+    function detectCategory(text) {
+      if (!text) return '비품/시설/행정';
+      const t = text.toLowerCase();
+      if (/승강기|엘베|엘리베이터|비상통화/.test(t)) return '승강기';
+      if (/정수기|비데|연수기|공기청정기|필터/.test(t)) return '정수기/환경가전';
+      if (/교탁|전자교탁|전자칠판|프로젝터|빔|마이크|스피커|음향|앰프|잡음|노이즈|방송|피아노|오르간|악기|기자재/.test(t)) return '전자교탁/기자재/악기';
+      if (/출입|전자출결|에스원|세콤|강제열림|도어락|경비|카드|마스터카드|문\s*안열림|문\s*열림|잠김|열람실\s*등록|기도탑/.test(t)) return '출입/전자출결';
+      if (/전화|통신|키폰|인터폰|내선|교환기|팩스/.test(t)) return '전화/통신';
+      if (/와이파이|wifi|랜선|네트워크|공유기|인터넷|ip|서버실|스위치|허브|포트|공유폴더|유선|디엔에스|dns|ap|cctv/.test(t)) return '네트워크';
+      if (/컴퓨터|본체|모니터|pc|데스크탑|노트북|키보드|마우스|ssd|하드|램|디스크|초기화|프린터|프린트|스풀러|복합기|토너|스캔|양면|한글|아웃룩|오피스|엑셀|원격|윈도우|업데이트|dism|bde|인증서|암호|부팅|복원|드라이버|발자국|cd롬|dvd|업무일지/.test(t)) return '컴퓨터/전산';
+      if (/비품|의자|선풍기|책상|수리|보일러|펌프|배터리|eps|밥|식당|지출결의|공문|문서접수|분동|위치\s*이동/.test(t)) return '비품/시설/행정';
+      return '컴퓨터/전산';
+    }
+
+    // DEFAULT DATA WITH CATEGORIES
+    const DEFAULT_DATA = [
+    {
+        "id": "date-20261106",
+        "dateTitle": "2026.11.06(금)",
+        "sections": {
+            "today": [
+                {
+                    "done": true,
+                    "text": "전체 업무일지 데이터베이스 마이그레이션 완료"
+                },
+                {
+                    "done": false,
+                    "text": "전산/시설 상시 모니터링"
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": "주간 업무 실적 검토"
+                }
+            ],
+            "daily": [
+                {
+                    "done": true,
+                    "text": "서버실 및 네트워크 가동 상태 확인"
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": true,
+                    "text": "전산/시설 누적 데이터 백업 확립"
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": "도서관 및 디지털존 잔여 라인 정비"
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "전산/시설 업무일지 시스템 구축 및 GitHub Pages 배포 완료",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "9월, 10월, 11월 누적 업무일지 데이터 일괄 변환 및 백업",
+                "category": "컴퓨터/전산"
+            }
+        ]
+    },
+    {
+        "id": "date-20261105",
+        "dateTitle": "2026.11.05(목)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "세교협 보일러제어 컴퓨터 교체",
+                "category": "컴퓨터/전산"
+            }
+        ]
+    },
+    {
+        "id": "date-20261104",
+        "dateTitle": "2026.11.04(수)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "김효숙교수 프린터 연결",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "교육혁신처조교 컴퓨터 연결",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "디지털존 14번 와이파이 연결",
+                "category": "네트워크"
+            },
+            {
+                "text": "디지털존 10번 와이파이 연결",
+                "category": "네트워크"
+            },
+            {
+                "text": "도서관 랜선 라인 서버실 제거",
+                "category": "네트워크"
+            },
+            {
+                "text": "이지현교수 프린터 스풀러 해재",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "이예주 아웃룩 실행안됨 해제",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "이예주 김채연 전화 연결 완료",
+                "category": "전화/통신"
+            },
+            {
+                "text": "고경민직원 마우스패드 요청",
+                "category": "컴퓨터/전산"
+            }
+        ]
+    },
+    {
+        "id": "date-20261103",
+        "dateTitle": "2026.11.03(화)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "이수연교수 문 열림",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "외국인학생 도서관 열람실 등록",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "음향 견적 세교협 국제회의장 예배당 메인스피커",
+                "category": "전자교탁/기자재/악기"
+            }
+        ]
+    },
+    {
+        "id": "date-20261102",
+        "dateTitle": "2026.11.02(월)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "소양관 510호 와이파이 안됨 (알고보니 교탁 인터넷!)",
+                "category": "전자교탁/기자재/악기"
+            },
+            {
+                "text": "교음과조교실 컴퓨터 안됨",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "교음과조교실 마우스 요청",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "하나로mgm과 승강기 관련",
+                "category": "승강기"
+            },
+            {
+                "text": "전지원계장 프린터 안됨",
+                "category": "컴퓨터/전산"
+            }
+        ]
+    },
+    {
+        "id": "date-20261029",
+        "dateTitle": "2026.10.29(목)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "소양관 503호 인터넷 연결",
+                "category": "네트워크"
+            },
+            {
+                "text": "소양관 502호 인터넷 연결",
+                "category": "네트워크"
+            },
+            {
+                "text": "김덕희실장 전화 변경",
+                "category": "전화/통신"
+            },
+            {
+                "text": "소양관 310호 스피커 안나옴",
+                "category": "전자교탁/기자재/악기"
+            },
+            {
+                "text": "이상일교수 잡음 들림",
+                "category": "전자교탁/기자재/악기"
+            },
+            {
+                "text": "교내 정수기 점검 실시",
+                "category": "정수기/환경가전"
+            }
+        ]
+    },
+    {
+        "id": "date-20261028",
+        "dateTitle": "2026.10.28(수)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "소양관 606호 네트워크 연결",
+                "category": "네트워크"
+            },
+            {
+                "text": "와이파이 5층 안터짐 민원",
+                "category": "네트워크"
+            },
+            {
+                "text": "이지현교수 한글실행안됨",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "안현정주임 모니터 안됨",
+                "category": "컴퓨터/전산"
+            }
+        ]
+    },
+    {
+        "id": "date-20261026",
+        "dateTitle": "2026.10.26(월)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "학술연구지원실 위치 이동",
+                "category": "비품/시설/행정"
+            },
+            {
+                "text": "신현태교수 컴퓨터 램 교체",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "박윤재 한글 설치",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "학술연구지원실 프린터 설치",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "학술연구지원실 위치 이동 관련",
+                "category": "비품/시설/행정"
+            }
+        ]
+    },
+    {
+        "id": "date-20261023",
+        "dateTitle": "2026.10.23(금)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "영성생활관 원격 설정",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "성지연구원 컴퓨터 설치의뢰",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "선교관 eps실 배터리 교체",
+                "category": "비품/시설/행정"
+            },
+            {
+                "text": "오르간 수리 음악관 2015호",
+                "category": "전자교탁/기자재/악기"
+            },
+            {
+                "text": "엘지 인터넷 전화 실사",
+                "category": "전화/통신"
+            },
+            {
+                "text": "영성생활관 컴퓨터 설치",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "모니터 설치 및 불용처리하기 이동처리하기",
+                "category": "컴퓨터/전산"
+            }
+        ]
+    },
+    {
+        "id": "date-20261021",
+        "dateTitle": "2026.10.21(수)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "교음과조교실 프린터 설치",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "교음과조교실 모니터 교체",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "학생상담소 인터넷 안됨",
+                "category": "네트워크"
+            },
+            {
+                "text": "정혜현실장 외장cd롬 대여",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "문서접수 3건",
+                "category": "비품/시설/행정"
+            },
+            {
+                "text": "경건훈련원 인터넷 증설 관련 상담",
+                "category": "네트워크"
+            },
+            {
+                "text": "서문 주차관제 cctv 안됨 - 네트워크 라인 재정비",
+                "category": "네트워크"
+            },
+            {
+                "text": "교음과조교실 마스터카드 출입권한 재조정",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "신현호교수 강제열림 해제",
+                "category": "출입/전자출결"
+            }
+        ]
+    },
+    {
+        "id": "date-20261020",
+        "dateTitle": "2026.10.20(화)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "교육혁신처 프린터 안됨",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "학생식당 밥 짓는거 안됨",
+                "category": "비품/시설/행정"
+            },
+            {
+                "text": "교음과조교실 컴퓨터 안됨",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "학생지원실 인터넷 안됨",
+                "category": "네트워크"
+            },
+            {
+                "text": "증명발급컴퓨터 안됨",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "정기묵교수 인터넷 안됨",
+                "category": "네트워크"
+            }
+        ]
+    },
+    {
+        "id": "date-20261019",
+        "dateTitle": "2026.10.19(월)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "강민혜 모니터 깜빡거림",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "교음과조교실 컴퓨터 교체",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "통신실 전산교환 컴퓨터 교체",
+                "category": "전화/통신"
+            },
+            {
+                "text": "증명발급기 인터넷 안됨 dns 변경",
+                "category": "네트워크"
+            },
+            {
+                "text": "남성혁교수 디엔에스",
+                "category": "네트워크"
+            },
+            {
+                "text": "이상원교수 디엔에스",
+                "category": "네트워크"
+            },
+            {
+                "text": "세교협 2층 와이파이 리셋",
+                "category": "네트워크"
+            },
+            {
+                "text": "윤가화 기도탑 열림 요청",
+                "category": "출입/전자출결"
+            }
+        ]
+    },
+    {
+        "id": "date-20261008",
+        "dateTitle": "2026.10.08(목)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "소양관 403호 네트워크 복구",
+                "category": "네트워크"
+            },
+            {
+                "text": "승강기 점검",
+                "category": "승강기"
+            },
+            {
+                "text": "하경택교수 컴퓨터 복원",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "KT 인터넷 전화 미팅",
+                "category": "전화/통신"
+            }
+        ]
+    },
+    {
+        "id": "date-20261006",
+        "dateTitle": "2026.10.06(월)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "도서관 디지털존 11번, 12번, 10번, 9번, 8번, 1번 초기화",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "디지털존 유선 라인 제거",
+                "category": "네트워크"
+            },
+            {
+                "text": "디지털존 내 유선 인터넷선 제거",
+                "category": "네트워크"
+            },
+            {
+                "text": "교음과조교실 공유폴더 안됨",
+                "category": "네트워크"
+            },
+            {
+                "text": "학생상담소 컴퓨터 수리 - 부품 주문 후 교체",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "디지털존 내 프린트존 외부 인터넷 연결",
+                "category": "네트워크"
+            },
+            {
+                "text": "여학생관 펌프제어 컴퓨터 연결",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "모니터 1 교체 및 여학생관 cctv모니터 교체",
+                "category": "네트워크"
+            },
+            {
+                "text": "모니터 폐기처리",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "김채연 추가모니터 설치",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "신대원학우회 강제열림 해제",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "도서관 박물관 강제열림 해제",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "백정진교수 강제열림 해제",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "이상원교수 램 교체",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "학생상담소 컴퓨터 수리 의뢰",
+                "category": "컴퓨터/전산"
+            }
+        ]
+    },
+    {
+        "id": "date-20261001",
+        "dateTitle": "2026.10.01(목)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "디지털존 국회원문 2, 4번 초기화 및 와이파이 연결",
+                "category": "네트워크"
+            },
+            {
+                "text": "디지털존 6번, 7번 초기화 및 와이파이 연결",
+                "category": "네트워크"
+            },
+            {
+                "text": "지하1층 검색PC 3대 초기화 및 와이파이 연결",
+                "category": "네트워크"
+            },
+            {
+                "text": "조윤정 스캔 설정",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "언어교육원 네트워크 안됨 문제",
+                "category": "네트워크"
+            },
+            {
+                "text": "소양관 105호 수유실 문 안열림",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "음악관 1007호 문 안열림",
+                "category": "출입/전자출결"
+            }
+        ]
+    },
+    {
+        "id": "date-20260930",
+        "dateTitle": "2026.09.30(수)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "주우영 스캔 안됨 원격 설정",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "고경민 종합정보 안됨 bde설정",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "안현정 오피스365 변경",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "조수연 오피스365 변경",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "김해나 오피스365",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "김해나 시작시 오류 뜸 증상",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "언어교육원 인터넷 설정",
+                "category": "네트워크"
+            },
+            {
+                "text": "지하1층 열람pc 4번 유선 제거",
+                "category": "네트워크"
+            },
+            {
+                "text": "1층 디지털존 열람pc 4번 유선 제거",
+                "category": "네트워크"
+            },
+            {
+                "text": "김해나 한글 안됨 2024 설치 및 dism 복구 작업 실시",
+                "category": "컴퓨터/전산"
+            }
+        ]
+    },
+    {
+        "id": "date-20260929",
+        "dateTitle": "2026.09.29(화)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "디지털존 2번, 14번 초기화",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "학생상담소 모니터 지출결의 문제",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "교음과조교실 컴퓨터 램 교체",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "이현민 시간강사 기도탑 출입등록 카드 발급 안내",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "영성생활관 811호 강제열림 설정",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "안재경과장 와이파이 ip안내",
+                "category": "네트워크"
+            },
+            {
+                "text": "안윤기교수 선풍기 교체 및 기존 선풍기 폐기처리",
+                "category": "비품/시설/행정"
+            },
+            {
+                "text": "기독교교육학과실 강제열림 해제",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "승강기 비상통화장치 배터리 교체 관련",
+                "category": "승강기"
+            }
+        ]
+    },
+    {
+        "id": "date-20260928",
+        "dateTitle": "2026.09.28(월)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "음악관 1002호 강제열림 설정",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "에스원 프로그램 안됨 세콤 문의",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "외래강사 출입관련 문의",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "승강기 합격증명서 부착",
+                "category": "승강기"
+            }
+        ]
+    },
+    {
+        "id": "date-20260923",
+        "dateTitle": "2026.09.23(수)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "권오성학생 에스원모바일카드",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "안정도교수 계단 출입등록",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "영성관 202호 강제열림 해제",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "디지털존 2번 유선제거 및 와이파이 장착 (국회원문 1번 포함)",
+                "category": "네트워크"
+            }
+        ]
+    },
+    {
+        "id": "date-20260922",
+        "dateTitle": "2026.09.22(화)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "교음과조교실 1002호 강제열림 해제",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "영성생활관 2층 강제열림 해제",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "영성생활관 4층 강제열림 해제",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "김경래교수 프린터 교체",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "남성현교수 컴퓨터 발자국 제거",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "한상수 출입카드발급신청",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "이은영 엑셀 문제",
+                "category": "컴퓨터/전산"
+            }
+        ]
+    },
+    {
+        "id": "date-20260921",
+        "dateTitle": "2026.09.21(월)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "소양관 506호 인터넷 안됨 라인 빠짐",
+                "category": "네트워크"
+            },
+            {
+                "text": "이수연교수 프린터 교체",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "이한나교수 램 재장착",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "김우식계장, 도현재 출입카드",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "교육혁신처 프린터 드라이버 설치",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "교육혁신처 신규연구원 네트워크 설정",
+                "category": "네트워크"
+            },
+            {
+                "text": "김채연 컴퓨터 설치",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "이예주 컴퓨터 철거 및 초기화 실시",
+                "category": "컴퓨터/전산"
+            }
+        ]
+    },
+    {
+        "id": "date-20260918",
+        "dateTitle": "2026.09.18(목)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "윤가화 컴퓨터 점검",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "예배당의자 지출결의",
+                "category": "비품/시설/행정"
+            },
+            {
+                "text": "소양관 관리실 컴퓨터 업데이트 끔",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "소양관 관리실 컴퓨터 추가 설치",
+                "category": "컴퓨터/전산"
+            }
+        ]
+    },
+    {
+        "id": "date-20260917",
+        "dateTitle": "2026.09.17(목)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "강민혜 그래픽 드라이버 다운그레이드",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "교음과조교실 프린터 연결",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "소양관 여학생수유실 도어락 건전지 제거",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "공기청정기 필터교체 실시",
+                "category": "정수기/환경가전"
+            },
+            {
+                "text": "예배당 의자 수리",
+                "category": "비품/시설/행정"
+            }
+        ]
+    },
+    {
+        "id": "date-20260916",
+        "dateTitle": "2026.09.16(수)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "교음과조교실 프린터 안됨",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "교음과조교실 컴퓨터 부팅안됨",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "문인탁실장 스캔 설정",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "문인탁실장 램 추가",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "소양관 101호 강제열림 해제",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "음악관 101호 강제열림 해제",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "소양관 전자교탁 장애 처리 완료",
+                "category": "전자교탁/기자재/악기"
+            },
+            {
+                "text": "박선옥계장 인증서 복사 문의",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "이예주직원 스캔 설정",
+                "category": "컴퓨터/전산"
+            }
+        ]
+    },
+    {
+        "id": "date-20260915",
+        "dateTitle": "2026.09.15(화)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "윤가화 카드 안맞음",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "전지원 프린터 토너",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "학생지원실 복합기 ip안됨",
+                "category": "네트워크"
+            },
+            {
+                "text": "학생지원실 프린터 수거",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "pbs 강제열림 해제",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "에스원 공사비 지출결의",
+                "category": "출입/전자출결"
+            }
+        ]
+    },
+    {
+        "id": "date-20260914",
+        "dateTitle": "2026.09.14(월)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "텔크 시험장 네트워크 안됨",
+                "category": "네트워크"
+            },
+            {
+                "text": "소양관 관리실 네트워크 안됨",
+                "category": "네트워크"
+            },
+            {
+                "text": "소양관 엘리베이터 점검",
+                "category": "승강기"
+            }
+        ]
+    },
+    {
+        "id": "date-20260910",
+        "dateTitle": "2026.09.10(목)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "영성생활관 503호 신현호교수 잠김",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "도서관 디지털존 인터넷 안됨 USB형",
+                "category": "네트워크"
+            },
+            {
+                "text": "박선옥계장 암호 삭제 요청",
+                "category": "컴퓨터/전산"
+            }
+        ]
+    },
+    {
+        "id": "date-20260909",
+        "dateTitle": "2026.09.09(수)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "승강기 점검",
+                "category": "승강기"
+            },
+            {
+                "text": "소양관 컴퓨터 업데이트 실시",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "이혜미학생 역사박물관 출입등록",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "도서관 승강기 멈춤",
+                "category": "승강기"
+            },
+            {
+                "text": "김용민과장 스캔 설정",
+                "category": "컴퓨터/전산"
+            }
+        ]
+    },
+    {
+        "id": "date-20260908",
+        "dateTitle": "2026.09.08(화)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "소양관 전망용 엘리베이터 멈춤",
+                "category": "승강기"
+            },
+            {
+                "text": "분동 관련 지출결의",
+                "category": "비품/시설/행정"
+            },
+            {
+                "text": "대외협력실 DVD 복사 요청",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "음악관 강제열림 설정 공문접수",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "승강기 안전점검 예정",
+                "category": "승강기"
+            }
+        ]
+    },
+    {
+        "id": "date-20260907",
+        "dateTitle": "2026.09.07(월)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "동문회 컴퓨터 램 재장착",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "최진봉교수 소리안남 재부팅",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "영성생활관 엘리베이터 정상작동",
+                "category": "승강기"
+            },
+            {
+                "text": "음악관 b1001호 도어락 a/s",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "김용민과장 스캔 설정",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "박선옥계장 저장된 암호",
+                "category": "컴퓨터/전산"
+            }
+        ]
+    },
+    {
+        "id": "date-20260904",
+        "dateTitle": "2026.09.04(금)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "교육혁신처 컴퓨터 수령 및 설치",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "기독교교육연구원 카드 발급 (서가영, 윤이나 외1명)",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "소양관 609호 마이크 확인 이상없음",
+                "category": "전자교탁/기자재/악기"
+            },
+            {
+                "text": "소양관 전망용 엘리베이터 정상작동",
+                "category": "승강기"
+            },
+            {
+                "text": "윤가화 음악관 강제열림 1주일 연장 공문 발송",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "도서관 와이파이 느림증상 AP 1번, 5번 리셋",
+                "category": "네트워크"
+            },
+            {
+                "text": "소양관 202호 프로젝터 확인 이상 없음",
+                "category": "전자교탁/기자재/악기"
+            },
+            {
+                "text": "이은영직원 램 교체",
+                "category": "컴퓨터/전산"
+            }
+        ]
+    },
+    {
+        "id": "date-20260903",
+        "dateTitle": "2026.09.03(목)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "성지연구원 컴퓨터 수리",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "백정진교수 컴퓨터 수리",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "이혜미학생 박물관 경비권한 설정",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "박정훈학생 경비 설정 안됨 해제",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "소양관 전망용 엘베 멈춤",
+                "category": "승강기"
+            },
+            {
+                "text": "영성생활관 엘베 멈춤",
+                "category": "승강기"
+            },
+            {
+                "text": "교육혁신처 전체 장애학생휴게실 출입권한 부여",
+                "category": "출입/전자출결"
+            }
+        ]
+    },
+    {
+        "id": "date-20260902",
+        "dateTitle": "2026.09.02(수)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "소양관 702호 스피커 수리 의뢰",
+                "category": "전자교탁/기자재/악기"
+            },
+            {
+                "text": "소양관 706호 프로젝터 및 마이크 확인",
+                "category": "전자교탁/기자재/악기"
+            },
+            {
+                "text": "생활관 여학생관 방송 노이즈 확인",
+                "category": "전자교탁/기자재/악기"
+            },
+            {
+                "text": "음악관 b1022 전자칠판 이상 없음",
+                "category": "전자교탁/기자재/악기"
+            },
+            {
+                "text": "김제니교수 안열림 에스원 a/s",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "여학생관 스피커 잡음 문의 (노이즈 체크)",
+                "category": "전자교탁/기자재/악기"
+            },
+            {
+                "text": "백정진교수 컴퓨터 수거 (디스크 교체)",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "김기현대대장 열람실 출입등록 요청",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "유선희교수 프린터 드라이버 재설치",
+                "category": "네트워크"
+            },
+            {
+                "text": "윤가화 에스원 권한문의",
+                "category": "출입/전자출결"
+            }
+        ]
+    },
+    {
+        "id": "date-20260901",
+        "dateTitle": "2026.09.01(화)",
+        "sections": {
+            "today": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "tomorrow": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "daily": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "thisWeek": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ],
+            "someday": [
+                {
+                    "done": false,
+                    "text": ""
+                }
+            ]
+        },
+        "doneWork": [
+            {
+                "text": "백정진교수 컴퓨터 문제 점검",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "교음과조교실 프린트 문제 해결",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "이은혜 원격 안내 및 프린터 양면 설정",
+                "category": "컴퓨터/전산"
+            },
+            {
+                "text": "배윤주학생 출입등록 (에스원)",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "교음과조교실 출입권한 문의",
+                "category": "출입/전자출결"
+            },
+            {
+                "text": "교육혁신처 조교 컴퓨터 교체 및 OS 설치",
+                "category": "컴퓨터/전산"
+            }
+        ]
+    }
+];
+
+    let entries = [];
+    let currentId = null;
+
+    // TOAST HELPER
+    function showToast(msg) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'bg-slate-900 text-white text-xs px-3.5 py-2 rounded-lg shadow-lg opacity-0 transition-opacity duration-200 pointer-events-auto';
+      toast.textContent = msg;
+      container.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.remove('opacity-0'));
+      setTimeout(() => {
+        toast.classList.add('opacity-0');
+        setTimeout(() => toast.remove(), 250);
+      }, 2500);
+    }
+
+    // STORAGE LOAD & SAVE
+    function loadData() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          entries = JSON.parse(stored);
+        } else {
+          entries = DEFAULT_DATA;
+          saveData(false);
+        }
+      } catch (e) {
+        entries = DEFAULT_DATA;
+      }
+
+      // Normalization: ensure doneWork objects have category
+      entries.forEach(entry => {
+        if (entry.doneWork) {
+          entry.doneWork = entry.doneWork.map(item => {
+            if (typeof item === 'string') {
+              return { text: item, category: detectCategory(item) };
+            }
+            if (!item.category) {
+              item.category = detectCategory(item.text);
+            }
+            return item;
+          });
+        }
       });
     }
 
-    document.getElementById('sel-month').addEventListener('change', (e) => {
-      renderReport(e.target.value);
-    });
+    function saveData(notify = true) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+        const ind = document.getElementById('saved-indicator');
+        const now = new Date();
+        const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        ind.textContent = `저장됨 (${timeStr})`;
+        if (notify) showToast('저장되었습니다.');
+      } catch (e) {
+        console.error(e);
+      }
+    }
 
-    renderReport('2026.10');
+    function getCurrentEntry() {
+      return entries.find(e => e.id === currentId) || entries[0];
+    }
+
+    // RENDER SIDEBAR LIST
+    function renderSidebar() {
+      const container = document.getElementById('date-list-container');
+      container.innerHTML = '';
+
+      entries.forEach(entry => {
+        const isSelected = entry.id === currentId;
+        const validDoneCount = (entry.doneWork || []).filter(w => w && w.text && w.text.trim()).length;
+        
+        const btn = document.createElement('button');
+        btn.className = `w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors flex items-center justify-between ${
+          isSelected 
+            ? 'bg-blue-50 text-blue-700 font-semibold border border-blue-200/60' 
+            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+        }`;
+        btn.innerHTML = `
+          <span class="truncate">${entry.dateTitle || '무제'}</span>
+          <span class="text-[10px] text-slate-400 font-mono">${validDoneCount}건</span>
+        `;
+        btn.addEventListener('click', () => {
+          selectEntry(entry.id);
+        });
+        container.appendChild(btn);
+      });
+    }
+
+    // SELECT ENTRY
+    function selectEntry(id) {
+      currentId = id;
+      const entry = getCurrentEntry();
+      if (!entry) return;
+
+      document.getElementById('entry-date-title').value = entry.dateTitle || '';
+      
+      const match = (entry.dateTitle || '').match(/\((.*?)\)/);
+      document.getElementById('label-done-date').textContent = match ? `(${match[1]} 완료 작업)` : '(완료 작업)';
+
+      const sections = ['today', 'tomorrow', 'daily', 'thisWeek', 'someday'];
+      sections.forEach(secKey => {
+        renderSectionItems(secKey, entry.sections?.[secKey] || []);
+      });
+
+      renderDoneWorkItems(entry.doneWork || []);
+      updateDailyStatsBadge();
+      renderSidebar();
+      updateMonthSelectOptions();
+      renderBottomMonthlyReport();
+    }
+
+    // RENDER SECTION CHECKBOX ITEMS
+    function renderSectionItems(secKey, items) {
+      const listEl = document.getElementById(`list-${secKey}`);
+      listEl.innerHTML = '';
+
+      if (items.length === 0) {
+        items.push({ done: false, text: '' });
+      }
+
+      items.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center space-x-2 group/row';
+        row.innerHTML = `
+          <input type="checkbox" class="custom-box" ${item.done ? 'checked' : ''}>
+          <input type="text" class="flex-1 text-sm bg-transparent border-b border-transparent hover:border-slate-200 focus:border-blue-400 focus:outline-none py-0.5 ${item.done ? 'line-through text-slate-400' : 'text-slate-800'}" placeholder="할 일 입력..." value="${escapeHtml(item.text || '')}">
+          <button type="button" class="btn-del-item text-slate-300 hover:text-rose-500 opacity-0 group-hover/row:opacity-100 transition-opacity p-0.5 no-print" title="삭제">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        `;
+
+        const chk = row.querySelector('.custom-box');
+        const txt = row.querySelector('input[type="text"]');
+        const del = row.querySelector('.btn-del-item');
+
+        chk.addEventListener('change', () => {
+          item.done = chk.checked;
+          if (chk.checked) {
+            txt.classList.add('line-through', 'text-slate-400');
+          } else {
+            txt.classList.remove('line-through', 'text-slate-400');
+          }
+          saveData(false);
+        });
+
+        txt.addEventListener('input', () => {
+          item.text = txt.value;
+          saveData(false);
+        });
+
+        txt.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            items.splice(idx + 1, 0, { done: false, text: '' });
+            saveData(false);
+            renderSectionItems(secKey, items);
+            const nextInputs = listEl.querySelectorAll('input[type="text"]');
+            if (nextInputs[idx + 1]) nextInputs[idx + 1].focus();
+          } else if (e.key === 'Backspace' && txt.value === '' && items.length > 1) {
+            e.preventDefault();
+            items.splice(idx, 1);
+            saveData(false);
+            renderSectionItems(secKey, items);
+            const prevInputs = listEl.querySelectorAll('input[type="text"]');
+            const targetIdx = Math.max(0, idx - 1);
+            if (prevInputs[targetIdx]) prevInputs[targetIdx].focus();
+          }
+        });
+
+        del.addEventListener('click', () => {
+          if (items.length > 1) {
+            items.splice(idx, 1);
+          } else {
+            items[0] = { done: false, text: '' };
+          }
+          saveData(false);
+          renderSectionItems(secKey, items);
+        });
+
+        listEl.appendChild(row);
+      });
+    }
+
+    // RENDER DONE WORK ITEMS WITH CATEGORY PILLS
+    function renderDoneWorkItems(workLines) {
+      const container = document.getElementById('list-done-work');
+      container.innerHTML = '';
+
+      if (workLines.length === 0) {
+        workLines.push({ text: '', category: '컴퓨터/전산' });
+      }
+
+      workLines.forEach((item, idx) => {
+        const catObj = CATEGORIES.find(c => c.key === item.category) || CATEGORIES[7];
+        
+        const row = document.createElement('div');
+        row.className = 'flex items-center space-x-2 group/row';
+        row.innerHTML = `
+          <button type="button" class="btn-toggle-cat flex-shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full ${catObj.bg} ${catObj.text} hover:opacity-80 transition-all select-none" title="클릭 시 분야 변경">
+            ${catObj.label}
+          </button>
+          <input type="text" class="flex-1 text-sm bg-transparent border-b border-transparent hover:border-slate-200 focus:border-blue-400 focus:outline-none py-1 text-slate-800" placeholder="완료한 작업 내용 입력..." value="${escapeHtml(item.text || '')}">
+          <button type="button" class="btn-del-done text-slate-300 hover:text-rose-500 opacity-0 group-hover/row:opacity-100 transition-opacity p-0.5 no-print" title="삭제">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        `;
+
+        const btnCat = row.querySelector('.btn-toggle-cat');
+        const txt = row.querySelector('input');
+        const del = row.querySelector('.btn-del-done');
+
+        // Cycle through categories on pill click
+        btnCat.addEventListener('click', () => {
+          const curIdx = CATEGORIES.findIndex(c => c.key === item.category);
+          const nextIdx = (curIdx + 1) % CATEGORIES.length;
+          item.category = CATEGORIES[nextIdx].key;
+          saveData(false);
+          renderDoneWorkItems(workLines);
+          updateDailyStatsBadge();
+        });
+
+        txt.addEventListener('input', () => {
+          item.text = txt.value;
+          // Auto-detect category if currently '기타' or empty
+          if (item.category === '비품/시설/행정' || item.category === '기타' || !item.category) {
+            const detected = detectCategory(txt.value);
+            if (detected) {
+              item.category = detected;
+              const nextCat = CATEGORIES.find(c => c.key === detected);
+              btnCat.className = `btn-toggle-cat flex-shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full ${nextCat.bg} ${nextCat.text} hover:opacity-80 transition-all select-none`;
+              btnCat.textContent = nextCat.label;
+            }
+          }
+          saveData(false);
+          updateDailyStatsBadge();
+        });
+
+        txt.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            workLines.splice(idx + 1, 0, { text: '', category: '컴퓨터/전산' });
+            saveData(false);
+            renderDoneWorkItems(workLines);
+            updateDailyStatsBadge();
+            const nextInputs = container.querySelectorAll('input');
+            if (nextInputs[idx + 1]) nextInputs[idx + 1].focus();
+          } else if (e.key === 'Backspace' && txt.value === '' && workLines.length > 1) {
+            e.preventDefault();
+            workLines.splice(idx, 1);
+            saveData(false);
+            renderDoneWorkItems(workLines);
+            updateDailyStatsBadge();
+            const prevInputs = container.querySelectorAll('input');
+            const targetIdx = Math.max(0, idx - 1);
+            if (prevInputs[targetIdx]) prevInputs[targetIdx].focus();
+          }
+        });
+
+        del.addEventListener('click', () => {
+          if (workLines.length > 1) {
+            workLines.splice(idx, 1);
+          } else {
+            workLines[0] = { text: '', category: '컴퓨터/전산' };
+          }
+          saveData(false);
+          renderDoneWorkItems(workLines);
+          updateDailyStatsBadge();
+        });
+
+        container.appendChild(row);
+      });
+    }
+
+    // UPDATE DAILY STATS BADGE PILL
+    function updateDailyStatsBadge() {
+      const entry = getCurrentEntry();
+      const badge = document.getElementById('badge-daily-stats-pill');
+      if (!entry) return;
+
+      const validLines = (entry.doneWork || []).filter(w => w && w.text && w.text.trim());
+      const count = validLines.length;
+
+      // Group counts
+      const counts = {};
+      validLines.forEach(w => {
+        const cat = w.category || '기타';
+        counts[cat] = (counts[cat] || 0) + 1;
+      });
+
+      const details = Object.entries(counts)
+        .map(([k, v]) => `${k} ${v}`)
+        .join(' • ');
+
+      badge.textContent = count > 0 ? `처리: ${count}건 (${details})` : '처리: 0건';
+    }
+
+    // CALCULATE GLOBAL STATISTICS
+    function calculateStatistics() {
+      let totalTasks = 0;
+      let categoryCounts = { '컴퓨터/전산': 0, '네트워크': 0, '출입/전자출결': 0, '전자교탁/기자재/악기': 0, '승강기': 0, '정수기/환경가전': 0, '전화/통신': 0, '비품/시설/행정': 0 };
+      const dateStats = [];
+
+      entries.forEach(entry => {
+        const validLines = (entry.doneWork || []).filter(w => w && w.text && w.text.trim());
+        const dayCount = validLines.length;
+        totalTasks += dayCount;
+
+        const dayCats = {};
+        validLines.forEach(w => {
+          const c = w.category || '기타';
+          categoryCounts[c] = (categoryCounts[c] || 0) + 1;
+          dayCats[c] = (dayCats[c] || 0) + 1;
+        });
+
+        dateStats.push({
+          dateTitle: entry.dateTitle || '무제',
+          count: dayCount,
+          categories: dayCats
+        });
+      });
+
+      const totalDays = entries.length;
+      const avgTasks = totalDays > 0 ? (totalTasks / totalDays).toFixed(1) : 0;
+
+      // Today's count
+      const todayEntry = getCurrentEntry();
+      const todayCount = (todayEntry?.doneWork || []).filter(w => w && w.text && w.text.trim()).length;
+
+      return {
+        totalTasks,
+        todayCount,
+        totalDays,
+        avgTasks,
+        categoryCounts,
+        dateStats
+      };
+    }
+
+    // RENDER STATS MODAL
+    function renderStatsModal() {
+      const stats = calculateStatistics();
+
+      document.getElementById('stat-total-tasks').textContent = `${stats.totalTasks}건`;
+      document.getElementById('stat-today-tasks').textContent = `${stats.todayCount}건`;
+      document.getElementById('stat-total-days').textContent = `${stats.totalDays}일`;
+      document.getElementById('stat-avg-tasks').textContent = `${stats.avgTasks}건`;
+
+      // Render category progress bars
+      const catListEl = document.getElementById('stat-categories-list');
+      catListEl.innerHTML = '';
+
+      CATEGORIES.forEach(cat => {
+        const cnt = stats.categoryCounts[cat.key] || 0;
+        const pct = stats.totalTasks > 0 ? Math.round((cnt / stats.totalTasks) * 100) : 0;
+
+        const div = document.createElement('div');
+        div.className = 'space-y-1';
+        div.innerHTML = `
+          <div class="flex items-center justify-between text-xs font-semibold">
+            <span class="flex items-center">
+              <span class="w-2.5 h-2.5 rounded-full ${cat.barBg} mr-1.5"></span>
+              ${cat.label}
+            </span>
+            <span class="text-slate-600 font-mono">${cnt}건 <span class="text-slate-400 font-normal">(${pct}%)</span></span>
+          </div>
+          <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+            <div class="${cat.barBg} h-2 rounded-full transition-all duration-300" style="width: ${pct}%"></div>
+          </div>
+        `;
+        catListEl.appendChild(div);
+      });
+
+      // Render Date breakdown table
+      const tbody = document.getElementById('stat-date-tbody');
+      tbody.innerHTML = '';
+
+      stats.dateStats.forEach(ds => {
+        const tr = document.createElement('tr');
+        const catSummary = Object.entries(ds.categories)
+          .map(([k, v]) => `<span class="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 mr-1">${k} ${v}</span>`)
+          .join('') || '<span class="text-slate-400">없음</span>';
+
+        tr.innerHTML = `
+          <td class="px-4 py-2 font-medium text-slate-800">${escapeHtml(ds.dateTitle)}</td>
+          <td class="px-4 py-2 text-center font-bold font-mono ${ds.count > 0 ? 'text-blue-600' : 'text-slate-400'}">${ds.count}건</td>
+          <td class="px-4 py-2">${catSummary}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // EXPORT REPORT AS CSV (EXCEL COMPATIBLE)
+    function exportToCsv() {
+      let csvContent = "\uFEFF"; // UTF-8 BOM for Korean in Excel
+      csvContent += "날짜,분야,처리내용\n";
+
+      entries.forEach(entry => {
+        const date = entry.dateTitle || '';
+        const lines = (entry.doneWork || []).filter(w => w && w.text && w.text.trim());
+        lines.forEach(item => {
+          const cleanText = item.text.replace(/"/g, '""');
+          const cat = item.category || '기타';
+          csvContent += `"${date}","${cat}","${cleanText}"\n`;
+        });
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const now = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      a.href = url;
+      a.download = `worklog_report_${now}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast('엑셀(CSV) 보고서 파일이 다운로드되었습니다.');
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, function(m) {
+        return {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#039;'
+        }[m];
+      });
+    }
+
+    // GENERATE PLAIN TEXT WITH CATEGORIES
+    function generatePlainText(entry) {
+      if (!entry) return '';
+      let out = `${entry.dateTitle || ''}\n\n`;
+
+      const sectionNames = {
+        today: '오늘',
+        tomorrow: '내일',
+        daily: '매일',
+        thisWeek: '이번 주',
+        someday: '언젠가'
+      };
+
+      for (const [key, label] of Object.entries(sectionNames)) {
+        out += `${label}\n`;
+        const items = entry.sections?.[key] || [];
+        if (items.length === 0) {
+          out += `□\n`;
+        } else {
+          items.forEach(it => {
+            const box = it.done ? '■' : '□';
+            out += `${box} ${it.text || ''}\n`;
+          });
+        }
+        out += `\n`;
+      }
+
+      out += `\n오늘 한 일\n\n`;
+      const doneLines = entry.doneWork || [];
+      doneLines.forEach(item => {
+        if (item && item.text && item.text.trim()) {
+          out += `[${item.category || '기타'}] ${item.text}\n\n`;
+        }
+      });
+
+      return out.trim();
+    }
+
+    function copyToClipboard(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('텍스트가 복사되었습니다!');
+        }).catch(() => fallbackCopy(text));
+      } else {
+        fallbackCopy(text);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('텍스트가 복사되었습니다!');
+      } catch (e) {
+        showToast('복사 실패');
+      }
+      document.body.removeChild(ta);
+    }
+
+    function downloadBackup() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(entries, null, 2));
+      const a = document.createElement('a');
+      const d = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      a.setAttribute("href", dataStr);
+      a.setAttribute("download", `simple_worklog_backup_${d}.json`);
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast('백업 파일(.json)이 다운로드되었습니다.');
+    }
+
+    function restoreBackup(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            entries = parsed;
+            // Normalize
+            entries.forEach(entry => {
+              if (entry.doneWork) {
+                entry.doneWork = entry.doneWork.map(item => {
+                  if (typeof item === 'string') {
+                    return { text: item, category: detectCategory(item) };
+                  }
+                  if (!item.category) item.category = detectCategory(item.text);
+                  return item;
+                });
+              }
+            });
+            saveData(false);
+            selectEntry(entries[0].id);
+            document.getElementById('modal-backup').classList.add('hidden');
+            showToast(`${entries.length}개의 날짜 기록이 복원되었습니다!`);
+          } else {
+            showToast('올바른 백업 파일 형식이 아닙니다.');
+          }
+        } catch (err) {
+          showToast('파일 읽기 오류');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    
+    
+    // --- PIN LOCK SYSTEM ---
+    const PWD_STORAGE_KEY = 'worklog_auth_pin_code';
+    let isUnlocked = false;
+
+    function getStoredPin() {
+      try {
+        return localStorage.getItem(PWD_STORAGE_KEY) || '1234';
+      } catch (e) {
+        return '1234';
+      }
+    }
+
+    function setStoredPin(newPin) {
+      try {
+        localStorage.setItem(PWD_STORAGE_KEY, newPin);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function lockApp() {
+      isUnlocked = false;
+      const overlay = document.getElementById('pin-lock-overlay');
+      overlay.classList.remove('hidden');
+      document.getElementById('input-pin-password').value = '';
+      document.getElementById('pin-error-msg').classList.add('hidden');
+      setTimeout(() => document.getElementById('input-pin-password').focus(), 100);
+    }
+
+    function unlockApp() {
+      isUnlocked = true;
+      const overlay = document.getElementById('pin-lock-overlay');
+      overlay.classList.add('hidden');
+      showToast('잠금이 해제되었습니다.');
+    }
+
+    // --- BOTTOM MONTHLY REPORT LOGIC ---
+    let selectedReportMonth = '';
+
+    function getMonthKeyFromTitle(title) {
+      if (!title) return '';
+      const match = title.match(/(\d{4})[.\-](\d{1,2})/);
+      if (match) {
+        return `${match[1]}-${String(match[2]).padStart(2, '0')}`;
+      }
+      return '';
+    }
+
+    function updateMonthSelectOptions() {
+      const select = document.getElementById('select-report-month');
+      const months = new Set();
+
+      entries.forEach(e => {
+        const m = getMonthKeyFromTitle(e.dateTitle);
+        if (m) months.add(m);
+      });
+
+      // Also add current month if empty
+      const now = new Date();
+      const curM = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      months.add(curM);
+
+      const sortedMonths = Array.from(months).sort().reverse();
+      select.innerHTML = '';
+      sortedMonths.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        const [y, mm] = m.split('-');
+        opt.textContent = `${y}년 ${parseInt(mm, 10)}월 보고`;
+        select.appendChild(opt);
+      });
+
+      if (!selectedReportMonth || !months.has(selectedReportMonth)) {
+        selectedReportMonth = sortedMonths[0];
+      }
+      select.value = selectedReportMonth;
+    }
+
+    function calculateMonthlyStats(monthKey) {
+      let totalTasks = 0;
+      const counts = { '컴퓨터/전산': 0, '네트워크': 0, '출입/전자출결': 0, '전자교탁/기자재/악기': 0, '승강기': 0, '정수기/환경가전': 0, '전화/통신': 0, '비품/시설/행정': 0 };
+
+      entries.forEach(e => {
+        const m = getMonthKeyFromTitle(e.dateTitle);
+        if (m === monthKey) {
+          const lines = (e.doneWork || []).filter(w => w && w.text && w.text.trim());
+          totalTasks += lines.length;
+          lines.forEach(w => {
+            const cat = w.category || '기타';
+            counts[cat] = (counts[cat] || 0) + 1;
+          });
+        }
+      });
+
+      return { totalTasks, counts, monthKey };
+    }
+
+    function renderBottomMonthlyReport() {
+      const stats = calculateMonthlyStats(selectedReportMonth);
+      const [y, m] = (selectedReportMonth || '2026-11').split('-');
+      
+      document.getElementById('monthly-report-title').textContent = `${y}년 ${parseInt(m, 10)}월 업무 처리 통계 (월말 보고용)`;
+      document.getElementById('bottom-month-total').textContent = `${stats.totalTasks}건`;
+      document.getElementById('bottom-month-pc').textContent = `${stats.counts['컴퓨터/전산'] || 0}건`;
+      document.getElementById('bottom-month-net').textContent = `${stats.counts['네트워크'] || 0}건`;
+      document.getElementById('bottom-month-access').textContent = `${stats.counts['출입/전자출결'] || 0}건`;
+      document.getElementById('bottom-month-printer').textContent = `${stats.counts['전자교탁/기자재/악기'] || 0}건`;
+      document.getElementById('bottom-month-sw').textContent = `${stats.counts['승강기'] || 0}건`;
+      document.getElementById('bottom-month-facility').textContent = `${stats.counts['정수기/환경가전'] || 0}건`;
+      document.getElementById('bottom-month-tel').textContent = `${stats.counts['전화/통신'] || 0}건`;
+      document.getElementById('bottom-month-etc').textContent = `${stats.counts['비품/시설/행정'] || 0}건`;
+
+      // Render segmented bar
+      const barEl = document.getElementById('bottom-progress-bar');
+      barEl.innerHTML = '';
+      const legendEl = document.getElementById('bottom-bar-legend');
+      legendEl.innerHTML = '';
+
+      if (stats.totalTasks === 0) {
+        barEl.innerHTML = '<div class="bg-slate-300 w-full h-full"></div>';
+        legendEl.innerHTML = '<span class="text-slate-400">해당 월에 등록된 처리 내역이 없습니다.</span>';
+        return;
+      }
+
+      CATEGORIES.forEach(cat => {
+        const cnt = stats.counts[cat.key] || 0;
+        if (cnt > 0) {
+          const pct = Math.round((cnt / stats.totalTasks) * 100);
+          const seg = document.createElement('div');
+          seg.className = `${cat.barBg} h-full`;
+          seg.style.width = `${pct}%`;
+          seg.title = `${cat.label}: ${cnt}건 (${pct}%)`;
+          barEl.appendChild(seg);
+
+          const leg = document.createElement('span');
+          leg.innerHTML = `<span class="inline-block w-2 h-2 rounded-full ${cat.barBg} mr-1"></span>${cat.label}: <strong>${cnt}건</strong> (${pct}%)`;
+          legendEl.appendChild(leg);
+        }
+      });
+    }
+
+    function copyMonthlyReportText() {
+      const stats = calculateMonthlyStats(selectedReportMonth);
+      const [y, m] = (selectedReportMonth || '2026-11').split('-');
+      
+      let text = `[${y}년 ${parseInt(m, 10)}월 전산/유지보수 업무 처리 통계 보고]\n`;
+      text += `━━━━━━━━━━━━━━━━━━━━━\n`;
+      text += `■ 총 처리 건수: ${stats.totalTasks}건\n\n`;
+      text += `■ 분야별 세부 내역:\n`;
+      
+      CATEGORIES.forEach(cat => {
+        const cnt = stats.counts[cat.key] || 0;
+        const pct = stats.totalTasks > 0 ? ((cnt / stats.totalTasks) * 100).toFixed(1) : 0;
+        text += `- ${cat.label}: ${cnt}건 (${pct}%)\n`;
+      });
+      text += `━━━━━━━━━━━━━━━━━━━━━\n`;
+
+      copyToClipboard(text);
+      showToast('월말 보고용 텍스트가 복사되었습니다!');
+    }
+
+    // INIT
+    document.addEventListener('DOMContentLoaded', () => {
+      loadData();
+      currentId = entries[0]?.id || 'date-20261106';
+
+      document.getElementById('entry-date-title').addEventListener('input', (e) => {
+        const entry = getCurrentEntry();
+        if (entry) {
+          entry.dateTitle = e.target.value;
+          saveData(false);
+          renderSidebar();
+        }
+      });
+
+      document.querySelectorAll('.btn-add-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const sec = btn.dataset.section;
+          const entry = getCurrentEntry();
+          if (!entry.sections) entry.sections = {};
+          if (!entry.sections[sec]) entry.sections[sec] = [];
+          entry.sections[sec].push({ done: false, text: '' });
+          saveData(false);
+          renderSectionItems(sec, entry.sections[sec]);
+          const inputs = document.querySelectorAll(`#list-${sec} input[type="text"]`);
+          if (inputs.length > 0) inputs[inputs.length - 1].focus();
+        });
+      });
+
+      document.getElementById('btn-add-done-line').addEventListener('click', () => {
+        const entry = getCurrentEntry();
+        if (!entry.doneWork) entry.doneWork = [];
+        entry.doneWork.push({ text: '', category: '컴퓨터/전산' });
+        saveData(false);
+        renderDoneWorkItems(entry.doneWork);
+        updateDailyStatsBadge();
+        const inputs = document.querySelectorAll('#list-done-work input');
+        if (inputs.length > 0) inputs[inputs.length - 1].focus();
+      });
+
+      document.getElementById('btn-toggle-sidebar').addEventListener('click', () => {
+        document.getElementById('sidebar-drawer').classList.toggle('hidden');
+      });
+
+      document.getElementById('btn-add-today').addEventListener('click', () => {
+        const now = new Date();
+        const days = ['일', '월', '화', '수', '목', '금', '토'];
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        const dayStr = days[now.getDay()];
+        const todayTitle = `${y}.${m}.${d}(${dayStr})`;
+
+        let existing = entries.find(e => e.dateTitle.startsWith(`${y}.${m}.${d}`));
+        if (existing) {
+          selectEntry(existing.id);
+          showToast('오늘 기록으로 이동했습니다.');
+        } else {
+          const newEntry = {
+            id: `date-${Date.now()}`,
+            dateTitle: todayTitle,
+            sections: {
+              today: [{ done: false, text: '' }],
+              tomorrow: [{ done: false, text: '' }],
+              daily: [{ done: false, text: '' }],
+              thisWeek: [{ done: false, text: '' }],
+              someday: [{ done: false, text: '' }]
+            },
+            doneWork: [{ text: '', category: '컴퓨터/전산' }]
+          };
+          entries.unshift(newEntry);
+          saveData(false);
+          selectEntry(newEntry.id);
+          showToast('오늘 날짜 일지가 생성되었습니다.');
+        }
+      });
+
+      document.getElementById('btn-new-date-entry').addEventListener('click', () => {
+        const newEntry = {
+          id: `date-${Date.now()}`,
+          dateTitle: '새 날짜 메모',
+          sections: {
+            today: [{ done: false, text: '' }],
+            tomorrow: [{ done: false, text: '' }],
+            daily: [{ done: false, text: '' }],
+            thisWeek: [{ done: false, text: '' }],
+            someday: [{ done: false, text: '' }]
+          },
+          doneWork: [{ text: '', category: '컴퓨터/전산' }]
+        };
+        entries.unshift(newEntry);
+        saveData(false);
+        selectEntry(newEntry.id);
+        const titleInput = document.getElementById('entry-date-title');
+        titleInput.focus();
+        titleInput.select();
+      });
+
+      document.getElementById('btn-delete-entry').addEventListener('click', () => {
+        if (entries.length <= 1) {
+          showToast('최소 1개의 기록은 유지되어야 합니다.');
+          return;
+        }
+        entries = entries.filter(e => e.id !== currentId);
+        saveData(false);
+        selectEntry(entries[0].id);
+        showToast('해당 날짜 일지가 삭제되었습니다.');
+      });
+
+      document.getElementById('btn-copy-raw-text').addEventListener('click', () => {
+        const entry = getCurrentEntry();
+        const text = generatePlainText(entry);
+        copyToClipboard(text);
+      });
+
+      document.getElementById('btn-print-doc').addEventListener('click', () => {
+        window.print();
+      });
+
+      // Stats modal actions
+      const modalStats = document.getElementById('modal-stats');
+      document.getElementById('btn-open-stats-modal').addEventListener('click', () => {
+        renderStatsModal();
+        modalStats.classList.remove('hidden');
+      });
+      document.getElementById('btn-close-stats-modal').addEventListener('click', () => {
+        modalStats.classList.add('hidden');
+      });
+      document.getElementById('btn-close-stats-footer').addEventListener('click', () => {
+        modalStats.classList.add('hidden');
+      });
+      document.getElementById('btn-export-csv').addEventListener('click', exportToCsv);
+
+      // Backup modal
+      const modalBackup = document.getElementById('modal-backup');
+      document.getElementById('btn-open-backup-modal').addEventListener('click', () => {
+        modalBackup.classList.remove('hidden');
+      });
+      document.getElementById('btn-close-backup-modal').addEventListener('click', () => {
+        modalBackup.classList.add('hidden');
+      });
+      document.getElementById('btn-close-backup-footer').addEventListener('click', () => {
+        modalBackup.classList.add('hidden');
+      });
+
+      document.getElementById('btn-download-json').addEventListener('click', downloadBackup);
+      document.getElementById('btn-quick-json-download').addEventListener('click', downloadBackup);
+
+      document.getElementById('input-backup-file').addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+          restoreBackup(e.target.files[0]);
+        }
+      });
+
+      
+      // Bottom monthly report handlers
+      updateMonthSelectOptions();
+      renderBottomMonthlyReport();
+
+      document.getElementById('select-report-month').addEventListener('change', (e) => {
+        selectedReportMonth = e.target.value;
+        renderBottomMonthlyReport();
+      });
+
+      document.getElementById('btn-copy-monthly-report').addEventListener('click', copyMonthlyReportText);
+
+      
+      // PIN Lock Form Handlers
+      const formPin = document.getElementById('form-pin-lock');
+      formPin.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const inputVal = document.getElementById('input-pin-password').value.trim();
+        const validPin = getStoredPin();
+
+        if (inputVal === validPin) {
+          unlockApp();
+        } else {
+          document.getElementById('pin-error-msg').classList.remove('hidden');
+          const inp = document.getElementById('input-pin-password');
+          inp.classList.add('border-rose-500', 'ring-1', 'ring-rose-500');
+          setTimeout(() => {
+            inp.classList.remove('border-rose-500', 'ring-1', 'ring-rose-500');
+          }, 1500);
+          inp.select();
+        }
+      });
+
+      // Immediate Lock button
+      document.getElementById('btn-lock-now').addEventListener('click', () => {
+        lockApp();
+        showToast('화면이 잠겼습니다.');
+      });
+
+      // Change Password Modal Handlers
+      const modalPwd = document.getElementById('modal-change-password');
+      document.getElementById('btn-open-pwd-modal').addEventListener('click', () => {
+        document.getElementById('input-new-pwd').value = '';
+        document.getElementById('input-new-pwd-confirm').value = '';
+        document.getElementById('pwd-change-error').classList.add('hidden');
+        modalPwd.classList.remove('hidden');
+        document.getElementById('input-new-pwd').focus();
+      });
+
+      document.getElementById('btn-close-change-pwd').addEventListener('click', () => {
+        modalPwd.classList.add('hidden');
+      });
+
+      document.getElementById('btn-cancel-pwd').addEventListener('click', () => {
+        modalPwd.classList.add('hidden');
+      });
+
+      document.getElementById('form-change-pwd').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const p1 = document.getElementById('input-new-pwd').value.trim();
+        const p2 = document.getElementById('input-new-pwd-confirm').value.trim();
+
+        if (p1.length < 2) {
+          document.getElementById('pwd-change-error').textContent = '비밀번호는 최소 2자리 이상이어야 합니다.';
+          document.getElementById('pwd-change-error').classList.remove('hidden');
+          return;
+        }
+
+        if (p1 !== p2) {
+          document.getElementById('pwd-change-error').textContent = '새 비밀번호가 일치하지 않습니다.';
+          document.getElementById('pwd-change-error').classList.remove('hidden');
+          return;
+        }
+
+        setStoredPin(p1);
+        modalPwd.classList.add('hidden');
+        showToast('비밀번호가 성공적으로 변경되었습니다!');
+      });
+
+      // Initial Lock Trigger
+      lockApp();
+
+      selectEntry(currentId);
+    });
   </script>
 </body>
 </html>
